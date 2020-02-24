@@ -17,7 +17,7 @@ class Location(object):
         self.isDiscovered = isDiscovered
         # Dictionary mapping from directions to other Location objects
         self.connections = {}
-        # Dictionary mapping from direction to Block object in that direction
+        # Dictionary mapping from direction to condition object in that direction
         self.blocks = {}
 
     # Mark the location as discovered
@@ -63,6 +63,10 @@ class Location(object):
     def add_item(self, name, item):
         self.items[name.lower()] = item
 
+    def check_item(self, item):
+        # Check if given item is in the location
+        return item.name.lower() in self.items
+        
     # Remove the item from location if player/NPC uses the item or takes it
     def remove_item(self, item):
         self.items.pop(item.name)
@@ -71,16 +75,19 @@ class Location(object):
     def check_block(self, direction, game_state):
         if direction not in self.blocks:
             return False
+        # Condition = (condition text, condition element) tuple
         conditions = self.blocks[direction]
         for condition in conditions:
-            if not game_state.is_condition_satisfied(condition[0]):
-                print(condition[1])
+            if not game_state.is_condition_satisfied(condition):
                 return True
         return False
     
     # Add a block at this location for given direction
-    def add_block(self, direction, description, conditions):
-        self.blocks[direction] = (conditions, description)
+    def add_block(self, direction, description, condition):
+        if direction not in self.blocks:
+            self.blocks[direction] = [condition]
+        else:
+            self.blocks[direction] = self.blocks[direction].append(condition)
         
 
         

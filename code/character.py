@@ -28,6 +28,10 @@ class Character(object):
     
     def get_item(self, item):
         self.inventory[item.name.lower()] = item
+
+    def check_item(self, item):
+        # Check if item is in inventory
+        return item.name.lower() in self.inventory
     
     def leave_item(self, item_name):
         # First add this item to the location the character is at
@@ -44,3 +48,15 @@ class Character(object):
         self.curr_location.remove(self)
         self.curr_location = location
         self.curr_location.characters.append(self)
+    
+    def relationship_status(self, other):
+        # MUST IMPROVE RELATIONSHIPS TO BE MULTIDIMENTIONAL
+        if self.acquaintances[other.id][0] < 0:
+            return 'dislike'
+        elif self.acquaintances[other.id][0] >= 0 and self.acquaintances[other.id][0] < 50:
+            return 'acquaintance'
+        elif self.acquaintances[other.id][0] >= 50 and self.acquaintances[other.id][0] < 85:
+            return 'friend'
+        elif self.acquaintances[other.id][0] >= 85 and self.acquaintances[other.id][0] < 100:
+            return 'good friend'
+

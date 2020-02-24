@@ -30,21 +30,4 @@ class Parser(object):
         self.drama_manager = drama
         # A list of all of the commands that the player has issued.
         self.command_history = []
-
-        """self.directions = ['north', 'south', 'west', 'east']
-        self.actions = ['go', 'take', 'drop'] """
-    
-"""     def processCommand(self, command):
-        tokens = tokenize(command)
-        if len(tokens) == 0:
-            return 'That is not valid.'
-        if tokens[0] in  self.actions:
-            if tokens[0] == 'go':
-                if len(tokens) == 1:
-                    return 'Where?'
-                else:
-                    if tokens[1] in self.directions:
-                        return 'Going ' + tokens[1]
-        else:
-            return 'That is not valid.' """
         
