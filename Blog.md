@@ -17,3 +17,10 @@ about 4 categories but I'm looking to improve that.
 I'm looking for ways to add dimention to character relationships. I want relationships to be an item that Drama Manager
 could use to adjust the plot but for now relationship is defined as a (short term, long term) relationship score tuple.
 It would be nice to add more complexity and layers to it.
+
+Monday February 25th:
+
+I met with CCB in the morning to discuss how to add more dimentions to Player-NPC relationships. He suggested that I could create a multiclass classifier and train on different categories of interactions such as friendly, romantic, hostile, etc.
+He also sent me a research paper "Learning to Speak and Act in a Fantasy Text Adventure Game" where they discuss how to assign
+interesting roles and characteristics to NPC characters. The techniques described there might be a bit beyond my project but
+it could be useful as a source.
