@@ -27,4 +27,8 @@ it could be useful as a source.
 
 I found several sentiment analysis data online that I could potentially use to train a multiclass classifier. I will likely focus on this after Alpha review.
 
+Tuesday February 26th:
+
+Started working on a mini example game to explore data structures
+
 
