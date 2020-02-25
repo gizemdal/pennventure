@@ -24,3 +24,7 @@ I met with CCB in the morning to discuss how to add more dimentions to Player-NP
 He also sent me a research paper "Learning to Speak and Act in a Fantasy Text Adventure Game" where they discuss how to assign
 interesting roles and characteristics to NPC characters. The techniques described there might be a bit beyond my project but
 it could be useful as a source.
+
+I found several sentiment analysis data online that I could potentially use to train a multiclass classifier. I will likely focus on this after Alpha review.
+
+
