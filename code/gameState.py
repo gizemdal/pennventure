@@ -1,14 +1,18 @@
 # Game State
 from character import Character
-import queue
+import Queue as queue
 
 id = 0 # plot point id
 class PlotPoint(object):
 
-    def __init__(self):
+    def __init__(self, name):
         global id
         self.id = id
+        self.name = name
         id += 1 # increment global id for unique ids per plot point
+    
+    def __eq__(self, other):
+        return self.id == other.id
 
 # Plot data structure: a directed graph-like structure with plot points as vertices and plot dependencies as edges
 class Plot(object):
@@ -27,9 +31,9 @@ class Plot(object):
 
     def add_new_adjacent(self, from_plot, to_plot, conditions):
         if from_plot.id not in self.adjacency_list:
-            self.adjacency_list[from_plot.id] = (to_plot.id, conditions)
+            self.adjacency_list[from_plot.id] = [(to_plot.id, conditions)]
         else:
-            self.adjacency_list[from_plot.id] = self.adjacency_list[from_plot.id].append((to_plot.id, conditions))
+            self.adjacency_list[from_plot.id] = self.adjacency_list[from_plot.id] + [(to_plot.id, conditions)]
     
     def add_condition_to_existing_pair(self, from_plot, to_plot, condition):
         for adj in self.adjacency_list[from_plot.id]:
@@ -43,13 +47,31 @@ class Plot(object):
         visited = []
         while not q.empty():
             current = q.get()
-            for adj in self.adjacency_list[current]:
-                if adj[0] == to_plot.id:
-                    return True
-                if adj[0] not in visited:
-                    q.put(adj[0])
+            if self.adjacency_list[current]:
+                for adj in self.adjacency_list[current]:
+                    if adj[0] == to_plot.id:
+                        return True
+                    if adj[0] not in visited:
+                        q.put(adj[0])
             visited.append(current)
         return False
+    
+    def print_plot(self):
+        level = 0
+        # explore the plot in a BFS way
+        q = queue.Queue()
+        q.put((self.start.id, level))
+        visited = []
+        while not q.empty():
+            current = q.get()
+            if current[0] in  self.adjacency_list:
+                for adj in self.adjacency_list[current[0]]:
+                    if adj[0] not in visited:
+                        q.put((adj[0], level + 1))
+            visited.append(current[0])
+            print('Name: ' + self.plot_points[current[0]].name + ' Level: ' + str(current[1]))
+            level += 1
+
 
 class GameState(object):
 
@@ -82,5 +104,17 @@ class GameState(object):
         elif condition[0] == 'player_is_friends_with':
             # In this case, the condition[1] will contain the NPC character
             if self.player.relationship_status(condition[1]) in ['friend', 'good friend']:
+                return True
+        elif condition[0] == 'player_is_acquaintances_with':
+            # In this case, the condition[1] will contain the NPC character
+            if self.player.relationship_status(condition[1]) == 'acquaintance':
+                return True
+        elif condition[0] == 'player_in_location':
+            # In this case, the condition[1] will be a location
+            if self.player.location == condition[1]:
+                return True
+        elif condition[0] == 'npc_in_location':
+            # In this case, the condition[1] will be of type (npc, location) tuple
+            if npc.location == condition[1][1]:
                 return True
         return False

@@ -30,7 +30,8 @@ class Item(object):
         if self in self.location.items[self.name]:
             self.location.remove_item(self)
         self.location = new_location
-        new_location.add_item(self.name, self)
+        if self.location:
+            self.location.add_item(self.name, self)
 
     # Returns a list of special commands associated with this object
     def get_commands(self):
@@ -47,6 +48,10 @@ class Item(object):
             function(arguments, preconditions)
         else:
             print('Cannot do the action. Try again.')
+
+# guard.add_action("hit guard with branch", hit_guard, ({"courtyard":courtyard}, 
+# {"branch":branch, "unconscious guard":unconscious_guard, "guard":guard, "key":key, "sword":sword}), 
+# preconditions={"inventory_contains":branch, "in_location":courtyard, "location_has_item":guard})
 
     
 

@@ -4,21 +4,24 @@ from gameState import GameState
 
 class Location(object):
 
-    def __init__(self, name, description, items, characters, isDiscovered=False):
+    def __init__(self, name, description, isDiscovered=False):
         # A short name for the location
         self.name = name
         # A description of the location
         self.description = description
         # Dictionary mapping from item name to Item objects present in this location
-        self.items = items
+        self.items = {}
         # List of characters who are present in this location
-        self.characters = characters
+        self.characters = {}
         # Flag that gets set to True once this location has been visited by player
         self.isDiscovered = isDiscovered
         # Dictionary mapping from directions to other Location objects
         self.connections = {}
         # Dictionary mapping from direction to condition object in that direction
         self.blocks = {}
+    
+    def __eq__(self, other):
+        return self.name == other.name
 
     # Mark the location as discovered
     def mark_discovered(self):

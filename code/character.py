@@ -14,7 +14,7 @@ class Character(object):
         # Current location of the character
         self.curr_location = location
         if self.curr_location:
-            self.curr_location.characters.append(self)
+            self.curr_location.characters[self.name] = self
         self.inventory = {}
         # People that this character has met. This is a person -> relationship mapping where relationship
         # is a tuple of (short-term, long-term) relationship score.
@@ -25,6 +25,12 @@ class Character(object):
 
     def met_someone(self, person_id, impression_score=0):
         self.acquaintances[person_id] = (impression_score, 0)
+    
+    def update_relationship(self, person_id, score):
+        if person_id not in self.acquaintances:
+            self.met_someone(person_id, score)
+        else:
+            self.acquaintances[person_id] = (self.acquaintances[person_id][0] + score, 0)
     
     def get_item(self, item):
         self.inventory[item.name.lower()] = item
@@ -45,9 +51,9 @@ class Character(object):
 
     def set_location(self, location):
         # Set current location of the character
-        self.curr_location.remove(self)
+        self.curr_location.pop(self.name)
         self.curr_location = location
-        self.curr_location.characters.append(self)
+        self.curr_location.characters[self.name] = self
     
     def relationship_status(self, other):
         # MUST IMPROVE RELATIONSHIPS TO BE MULTIDIMENTIONAL
