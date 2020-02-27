@@ -38,20 +38,23 @@ class Item(object):
         return self.actions.keys()
     
     # Add a special action associated with this item
-    def add_action(self, command_text, function, arguments, preconditions={}):
+    def add_action(self, command_text, function, arguments, preconditions=[]):
         self.actions[command_text] = (function, arguments, preconditions)
 
     # Perform a special action associated with this item
-    def do_action(self, command_text, game):
+    def do_action(self, command_text, game_state):
         if command_text in self.actions:
             function, arguments, preconditions = self.actions[command_text]
-            function(arguments, preconditions)
+            all_conditions_met = True
+            for condition in preconditions:
+                if not game_state.is_condition_satisfied(condition):
+                    all_conditions_met = False
+            if all_conditions_met:
+                result = function(arguments)
+                return result
         else:
             print('Cannot do the action. Try again.')
-
-# guard.add_action("hit guard with branch", hit_guard, ({"courtyard":courtyard}, 
-# {"branch":branch, "unconscious guard":unconscious_guard, "guard":guard, "key":key, "sword":sword}), 
-# preconditions={"inventory_contains":branch, "in_location":courtyard, "location_has_item":guard})
+            return False
 
     
 

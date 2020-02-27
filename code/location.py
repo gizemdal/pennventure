@@ -65,6 +65,7 @@ class Location(object):
     # Add an item to location if player/NPC drops an item or item is located here
     def add_item(self, name, item):
         self.items[name.lower()] = item
+        item.location = self
 
     def check_item(self, item):
         # Check if given item is in the location
@@ -72,7 +73,8 @@ class Location(object):
         
     # Remove the item from location if player/NPC uses the item or takes it
     def remove_item(self, item):
-        self.items.pop(item.name)
+        if item.name in self.items:
+            self.items.pop(item.name)
     
     # Check if given direction is blocked at this location
     def check_block(self, direction, game_state):

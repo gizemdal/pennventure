@@ -30,4 +30,7 @@ class Parser(object):
         self.drama_manager = drama
         # A list of all of the commands that the player has issued.
         self.command_history = []
+    
+    def parse_command(self, command):
+        return True
         

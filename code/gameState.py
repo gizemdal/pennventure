@@ -1,6 +1,6 @@
 # Game State
 from character import Character
-import Queue as queue
+import queue
 
 id = 0 # plot point id
 class PlotPoint(object):
@@ -75,11 +75,11 @@ class Plot(object):
 
 class GameState(object):
 
-    def __init__(self, player, start_at, plot):
+    def __init__(self, player, start_at, plot, npcs={}, locations={}):
         self.player = player
         self.current_location = start_at
-        self.npcs = {}
-        self.locations = {}
+        self.npcs = npcs
+        self.locations = locations
         self.plot = plot
         self.current_plot_point = self.plot.start
 
@@ -91,30 +91,51 @@ class GameState(object):
         if condition[0] == 'item_in_player_inventory':
             if self.player.check_item(condition[1]):
                 return True
+            else:
+                print("You don't have the %s" % condition[1].name)
         elif condition[0] == 'item_in_npc_inventory':
             # In this case, the condition[1] will be of type (npc, item) tuple
             npc = condition[1][0]
             if npc.check_item(condition[1][1]):
                 return True
+            else:
+                print("%s doesn't have the %s" % npc.name, condition[1][1].name)
         elif condition[0] == 'item_in_location':
             # In this case, the condition[1] will be of type (location, item) tuple
             loc = condition[1][0]
             if loc.check_item(condition[1][1]):
                 return True
+            else:
+                print("%s isn't in the %s" % condition[1][1].name, loc.name)
         elif condition[0] == 'player_is_friends_with':
             # In this case, the condition[1] will contain the NPC character
             if self.player.relationship_status(condition[1]) in ['friend', 'good friend']:
                 return True
+            else:
+                print("You're not close enough with %s to perform this action." % condition[1].name)
         elif condition[0] == 'player_is_acquaintances_with':
             # In this case, the condition[1] will contain the NPC character
             if self.player.relationship_status(condition[1]) == 'acquaintance':
                 return True
+            else:
+                print("You know %s already to perform this action." % condition[1].name)
+        elif condition[0] == 'player_is_hostile_with':
+            # In this case, the condition[1] will contain the NPC character
+            if self.player.relationship_status(condition[1]) == 'hostile':
+                return True
+            else:
+                print("You don't dislike %s enough to perform this action." % condition[1].name)
         elif condition[0] == 'player_in_location':
             # In this case, the condition[1] will be a location
             if self.player.location == condition[1]:
                 return True
+            else:
+                print("You're not in the %s" % condition[1].name)
         elif condition[0] == 'npc_in_location':
             # In this case, the condition[1] will be of type (npc, location) tuple
+            npc = condition[1][0]
             if npc.location == condition[1][1]:
                 return True
+            else:
+                print("%s is not in the %s" % npc.name, condition[1][1].name)
         return False
