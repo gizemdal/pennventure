@@ -32,5 +32,15 @@ class Parser(object):
         self.command_history = []
     
     def parse_command(self, command):
-        return True
+        # TODO: Finish implementation
+        result = self.categorize_command(command)
+
+        # pass result to drama manager
+        game_end = self.drama_manager.update_game_state(result)
+        return game_end
+    
+    def categorize_command(self, command):
+        # Determine which category the command belongs to
+        # TODO: Implement this
+        return 'this'
         

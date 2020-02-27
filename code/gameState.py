@@ -5,10 +5,11 @@ import queue
 id = 0 # plot point id
 class PlotPoint(object):
 
-    def __init__(self, name):
+    def __init__(self, name, is_end=False):
         global id
         self.id = id
         self.name = name
+        self.is_end = is_end # Is this plot point an end point?
         id += 1 # increment global id for unique ids per plot point
     
     def __eq__(self, other):
@@ -99,14 +100,14 @@ class GameState(object):
             if npc.check_item(condition[1][1]):
                 return True
             else:
-                print("%s doesn't have the %s" % npc.name, condition[1][1].name)
+                print("%s doesn't have the %s" % (npc.name, condition[1][1].name))
         elif condition[0] == 'item_in_location':
             # In this case, the condition[1] will be of type (location, item) tuple
             loc = condition[1][0]
             if loc.check_item(condition[1][1]):
                 return True
             else:
-                print("%s isn't in the %s" % condition[1][1].name, loc.name)
+                print("%s isn't in the %s" % (condition[1][1].name, loc.name))
         elif condition[0] == 'player_is_friends_with':
             # In this case, the condition[1] will contain the NPC character
             if self.player.relationship_status(condition[1]) in ['friend', 'good friend']:
@@ -127,15 +128,15 @@ class GameState(object):
                 print("You don't dislike %s enough to perform this action." % condition[1].name)
         elif condition[0] == 'player_in_location':
             # In this case, the condition[1] will be a location
-            if self.player.location == condition[1]:
+            if self.player.curr_location == condition[1]:
                 return True
             else:
                 print("You're not in the %s" % condition[1].name)
         elif condition[0] == 'npc_in_location':
             # In this case, the condition[1] will be of type (npc, location) tuple
             npc = condition[1][0]
-            if npc.location == condition[1][1]:
+            if npc.curr_location == condition[1][1]:
                 return True
             else:
-                print("%s is not in the %s" % npc.name, condition[1][1].name)
+                print("%s is not in the %s" % (npc.name, condition[1][1].name))
         return False

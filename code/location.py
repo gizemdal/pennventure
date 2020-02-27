@@ -21,7 +21,15 @@ class Location(object):
         self.blocks = {}
     
     def __eq__(self, other):
-        return self.name == other.name
+        if self:
+            if other:
+                return self.name == other.name
+            else:
+                return False
+        else:
+            if other:
+                return False
+            return True
 
     # Mark the location as discovered
     def mark_discovered(self):

@@ -64,7 +64,7 @@ class Game(object):
         plot_graph.add_plot_point(ask_brian_money)
         buy_snack = PlotPoint("Can buy snack")
         plot_graph.add_plot_point(buy_snack)
-        end_point = PlotPoint("END")
+        end_point = PlotPoint("END", is_end=True)
         plot_graph.add_plot_point(end_point)
 
         # Preconditions
@@ -155,7 +155,9 @@ def game_loop():
     while not (command.lower() == "exit" or command.lower == "q"):
         command = input(">")
         result = game.parser.parse_command(command)
-    return
+        if result:
+            break
+    print('Game ended')
 
 game_loop()
 
