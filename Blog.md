@@ -29,6 +29,7 @@ I found several sentiment analysis data online that I could potentially use to t
 
 Tuesday February 26th:
 
-Started working on a mini example game to explore data structures
+Started working on a mini example game to explore data structures.
+Mini example game is almost finished, now working on the parser and drama manager. The parser will contain a bunch of if-else checks to determine the category of the command and will call the needed functions. Drama manager will update the current plot point the game is at and will potentially add/remove npcs in locations for the current mini game.
 
 
