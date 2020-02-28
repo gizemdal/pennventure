@@ -39,4 +39,6 @@ Thursday Feb 27th:
 
 Created visual content to represent class structures and plot graph. Prepared Alpha review presentation. Next goal is to finish the parser implementation, then build the connection between the parser and drama manager
 
+Friday February 28th:
 
+Added direction and location detection to the parser.
