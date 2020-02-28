@@ -6,13 +6,14 @@ char_id = 0 # unique character id
 
 class Character(object):
 
-    def __init__(self, name="", location=None):
+    def __init__(self, name="", location=None, is_player=False):
         global char_id
         self.name = name
         self.id = char_id
         char_id += 1
         # Current location of the character
         self.curr_location = location
+        self.is_player = is_player
         if self.curr_location:
             self.curr_location.characters[self.name] = self
         self.inventory = {}
@@ -69,6 +70,9 @@ class Character(object):
         self.curr_location.pop(self.name)
         self.curr_location = location
         self.curr_location.characters[self.name] = self
+        if self.is_player:
+            if not self.curr_location.isDiscovered:
+                self.curr_location.isDiscovered = True
     
     def relationship_status(self, other):
         # COULD IMPROVE RELATIONSHIPS TO BE MULTIDIMENTIONAL
