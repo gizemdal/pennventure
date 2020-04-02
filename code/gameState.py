@@ -1,6 +1,9 @@
 # Game State
 from character import Character
-import queue
+try:
+    import queue
+except ImportError:
+    import Queue as queue
 
 id = 0 # plot point id
 class PlotPoint(object):

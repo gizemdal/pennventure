@@ -23,6 +23,14 @@ def tokenize(text):
             tokens.append(''.join(w))
     return tokens
 
+def untokenize(words):
+    # Put words together and separate them by space character
+    text = ''
+    for word in words:
+        text += word
+        text += ' '
+    return text[:-1]
+
 class Parser(object):
 
     def __init__(self, drama):
@@ -50,15 +58,30 @@ class Parser(object):
                 return ('direction', category[0])
             return ('go to location', category[0])
         
+        category = command
+        tokens = tokenize(category) # command splitted
         # Check for description
-
+        if category == 'look around':
+            return ('look around')
+        
+        # Check for inventory
+        if category == 'inventory' or category == 'i':
+            return ('inventory')
+            
         # Check for examination
-
+        if len(tokens) > 1 and tokens[0] == 'examine':
+            return ('examine', untokenize(tokens[1:]))
         # Check for take
+        if len(tokens) > 1 and tokens[0] == 'take':
+            return ('take', untokenize(tokens[1:]))
 
         # Check for drop
+        if len(tokens) > 1 and tokens[0] == 'drop':
+            return ('drop', untokenize(tokens[1:]))
 
-
+        else:
+            # check for special command
+            return ('special', command)
     
     def direction(self, command):
         # Return type:
