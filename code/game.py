@@ -54,17 +54,13 @@ class Game(object):
         plot_graph = Plot(PlotPoint("START"))
         anna_in_hallway = PlotPoint("Anna in hallway")
         plot_graph.add_plot_point(anna_in_hallway)
-        ask_anna_money = PlotPoint("Can ask Anna for money")
-        plot_graph.add_plot_point(ask_anna_money)
         go_back_to_bedroom = PlotPoint("Go back in to bedroom", changes_to_make=[('set_npc_location_none', anna)])
         plot_graph.add_plot_point(go_back_to_bedroom)
         player_in_bedroom = PlotPoint("Player in bedroom", changes_to_make=[('bring_npc_to', (brian, hallway))])
         plot_graph.add_plot_point(player_in_bedroom)
         brian_in_hallway = PlotPoint("Brian in hallway")
         plot_graph.add_plot_point(brian_in_hallway)
-        ask_brian_money = PlotPoint("Can ask Brian for money")
-        plot_graph.add_plot_point(ask_brian_money)
-        buy_snack = PlotPoint("Can buy snack")
+        buy_snack = PlotPoint("Can buy snack", changes_to_make=[('set_npc_location_none', brian)])
         plot_graph.add_plot_point(buy_snack)
         end_point = PlotPoint("END", is_end=True)
         plot_graph.add_plot_point(end_point)
@@ -82,13 +78,11 @@ class Game(object):
         
         # Set up the graph
         plot_graph.add_new_adjacent(plot_graph.start, anna_in_hallway, [called_anna])
-        plot_graph.add_new_adjacent(anna_in_hallway, ask_anna_money, [friendly_to_anna])
-        plot_graph.add_new_adjacent(ask_anna_money, buy_snack, [have_money])
+        plot_graph.add_new_adjacent(anna_in_hallway, buy_snack, [friendly_to_anna, have_money])
         plot_graph.add_new_adjacent(anna_in_hallway, go_back_to_bedroom, [rude_to_anna, not_have_money])
         plot_graph.add_new_adjacent(go_back_to_bedroom, player_in_bedroom, [in_bedroom])
         plot_graph.add_new_adjacent(player_in_bedroom, brian_in_hallway, [brian_around])
-        plot_graph.add_new_adjacent(brian_in_hallway, ask_brian_money, [talk_to_brian])
-        plot_graph.add_new_adjacent(ask_brian_money, buy_snack, [have_money])
+        plot_graph.add_new_adjacent(brian_in_hallway, buy_snack, [talk_to_brian, have_money])
         plot_graph.add_new_adjacent(buy_snack, end_point, [have_snack])
 
         # Add actions
@@ -99,7 +93,7 @@ class Game(object):
         anna.add_action('friendly interaction', interaction_with_person, (player, anna, 20, "You compliment Anna's dress and tell a funny joke.\n" +\
                                                                                             "'Omg you're so funny!' she cries."),
                                                                                             preconditions=[('npc_in_location', (anna, hallway))])
-        anna.add_action('rude interaction', interaction_with_person, (player, anna, -50, "You make fun of Anna's dress and make-up.\n" +\
+        anna.add_action('rude interaction', interaction_with_person, (player, anna, -999, "You make fun of Anna's dress and make-up.\n" +\
                                                                                          "'You're such a prick! Ugh, I don't want to talk to you!' She yells and storms off the building."),
                                                                                          preconditions=[('npc_in_location', (anna, hallway))])
         anna.add_action('ask for money', ask_for_item, (player, anna, money, "You tell Anna that you need some money. She hands you 5 bucks.", "You already did this action."), 

@@ -83,7 +83,7 @@ class Character(object):
             return 'acquaintance'
         elif self.acquaintances[other.id][0] >= 50 and self.acquaintances[other.id][0] < 85:
             return 'friend'
-        elif self.acquaintances[other.id][0] >= 85 and self.acquaintances[other.id][0] < 100:
+        elif self.acquaintances[other.id][0] >= 85:
             return 'good friend'
 
     def get_items_in_scope(self):
