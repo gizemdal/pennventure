@@ -55,33 +55,29 @@ class Parser(object):
         category = self.direction(command)
         if category:
             if category[1] == 0:
-                return ('direction', category[0])
-            return ('go to location', category[0])
+                return ['direction', category[0]]
+            return ['go to location', category[0]]
         
         category = command
         tokens = tokenize(category) # command splitted
         # Check for description
-        if category == 'look around':
-            return ('look around')
-        
+        if category.lower() == 'look around':
+            return ['look around']
         # Check for inventory
-        if category == 'inventory' or category == 'i':
-            return ('inventory')
-            
+        if category.lower() == 'inventory' or category == 'i':
+            return ['inventory']
         # Check for examination
         if len(tokens) > 1 and tokens[0] == 'examine':
-            return ('examine', untokenize(tokens[1:]))
+            return ['examine', untokenize(tokens[1:])]
         # Check for take
         if len(tokens) > 1 and tokens[0] == 'take':
-            return ('take', untokenize(tokens[1:]))
-
+            return ['take', untokenize(tokens[1:])]
         # Check for drop
         if len(tokens) > 1 and tokens[0] == 'drop':
-            return ('drop', untokenize(tokens[1:]))
-
+            return ['drop', untokenize(tokens[1:])]
         else:
             # check for special command
-            return ('special', command)
+            return ['special', command]
     
     def direction(self, command):
         # Return type:

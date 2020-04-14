@@ -50,7 +50,7 @@ class Character(object):
         return item.name.lower() in self.inventory
     
     def leave_item(self, item_name):
-        if item_name.lower() in self.inventory:
+        if item_name in self.inventory:
             # First add this item to the location the character is at
             self.curr_location.add_item(item_name, self.inventory[item_name.lower()])
             # Then remove the item from character's inventory
@@ -59,7 +59,7 @@ class Character(object):
             print('You do not have this item in your inventory.')
 
     def use_item(self, item_name):
-        if item_name.lower() in self.inventory:
+        if item_name in self.inventory:
             # Remove the item from character's inventory
             self.inventory.pop(item_name.lower())
         else:
@@ -67,15 +67,16 @@ class Character(object):
 
     def set_location(self, location):
         # Set current location of the character
-        self.curr_location.pop(self.name)
+        if self.curr_location:
+            del self.curr_location.characters[self.name]
         self.curr_location = location
-        self.curr_location.characters[self.name] = self
+        if self.curr_location:
+            self.curr_location.characters[self.name] = self
         if self.is_player:
             if not self.curr_location.isDiscovered:
                 self.curr_location.isDiscovered = True
     
     def relationship_status(self, other):
-        # COULD IMPROVE RELATIONSHIPS TO BE MULTIDIMENTIONAL
         if self.acquaintances[other.id][0] < 0:
             return 'dislike'
         elif self.acquaintances[other.id][0] >= 0 and self.acquaintances[other.id][0] < 50:

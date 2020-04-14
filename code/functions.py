@@ -45,7 +45,7 @@ def redeem_item(*args):
     player.use_item(use_item)
 
     # Add bought item to inventory
-    player.add_item(buy_item)
+    player.get_item(buy_item)
 
     print(description)
 

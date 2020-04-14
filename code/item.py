@@ -47,8 +47,10 @@ class Item(object):
             function, arguments, preconditions = self.actions[command_text]
             all_conditions_met = True
             for condition in preconditions:
-                if not game_state.is_condition_satisfied(condition):
+                status = game_state.is_condition_satisfied(condition)
+                if not status[0]:
                     all_conditions_met = False
+                    print(status[1])
             if all_conditions_met:
                 result = function(arguments)
                 return result
