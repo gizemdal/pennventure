@@ -83,6 +83,8 @@ class DramaManager(object):
                     self.game_state.player.leave_item(action[1].lower())
             else:
                 # special command
+                if action[1].lower() == 'exit' or action[1].lower() == 'q':
+                    return True
                 command_found = False
                 # First check if it's related to an inventory or location item
                 for item in self.game_state.player.get_items_in_scope():

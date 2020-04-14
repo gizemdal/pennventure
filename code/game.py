@@ -1,5 +1,10 @@
 # Game
-
+try:
+    import tkinter
+    from tkinter import *
+except ImportError:
+    from Tkinter import *
+    import Tkinter as tkinter
 # Import classes
 from gameState import GameState, PlotPoint, Plot
 from dramaManager import DramaManager
@@ -170,15 +175,15 @@ def game_loop():
         if game.parser.drama_manager.game_state.current_location.name != prev_location:
             prev_location = game.parser.drama_manager.game_state.current_location.name
             game.describe()
+        
         command = raw_input('>')
         result = game.parser.parse_command(command)
         if result:
             break
     print('Game ended')
 
+#Run game loop
 game_loop()
-
-
 
 
 
