@@ -25,6 +25,7 @@ class NPC(Character):
                 if not status[0]:
                     all_conditions_met = False
                     print(status[1])
+                    break
             if all_conditions_met:
                 result = function(arguments)
                 return result

@@ -97,19 +97,4 @@ class Parser(object):
         elif command == 'out' or command == 'go out':
             return ('out', 0)
         else:
-            tokens = tokenize(command)
-            if len(tokens) > 2:
-                if tokens[0] == 'go' and tokens[1] == 'to':
-                    loc = ''
-                    for i in range(2, len(tokens)):
-                        loc += tokens[i]
-                        loc += ' '
-                    loc = loc[:-1]
-                    loc = loc.lower()
-                    # go through all the locations
-                    for l in self.drama_manager.game_state.locations.keys():
-                        if l == loc:
-                            if self.drama_manager.game_state.locations[l].isDiscovered:
-                                return (l, 1)
-                            break
             return None

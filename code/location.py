@@ -2,9 +2,12 @@
 import string
 from gameState import GameState
 
+loc_id = 0 # unique location id, assigned by creation order
+
 class Location(object):
 
     def __init__(self, name, description, isDiscovered=False):
+        global loc_id
         # A short name for the location
         self.name = name
         # A description of the location
@@ -19,11 +22,13 @@ class Location(object):
         self.connections = {}
         # Dictionary mapping from direction to condition object in that direction
         self.blocks = {}
+        self.id = loc_id
+        loc_id += 1
     
     def __eq__(self, other):
         if self:
             if other:
-                return self.name == other.name
+                return self.id == other.id
             else:
                 return False
         else:

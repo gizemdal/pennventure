@@ -77,13 +77,13 @@ class Character(object):
                 self.curr_location.isDiscovered = True
     
     def relationship_status(self, other):
-        if self.acquaintances[other.id][0] < 0:
+        if self.acquaintances[other.id][0] < 0 and other.acquaintances[self.id][0] < 0:
             return 'dislike'
-        elif self.acquaintances[other.id][0] >= 0 and self.acquaintances[other.id][0] < 50:
+        elif (self.acquaintances[other.id][0] >= 0 and self.acquaintances[other.id][0] < 50):
             return 'acquaintance'
-        elif self.acquaintances[other.id][0] >= 50 and self.acquaintances[other.id][0] < 85:
+        elif (self.acquaintances[other.id][0] >= 50 and self.acquaintances[other.id][0] < 85) and (other.acquaintances[self.id][0] >= 50 and other.acquaintances[self.id][0] < 85):
             return 'friend'
-        elif self.acquaintances[other.id][0] >= 85:
+        elif self.acquaintances[other.id][0] >= 85 and other.acquaintances[self.id][0] >= 85:
             return 'good friend'
 
     def get_items_in_scope(self):

@@ -2,6 +2,8 @@
 from location import Location
 import string
 
+item_id = 0 # unique item id, assigned by creation order
+
 class Item(object):
 
     def __init__(self, 
@@ -10,7 +12,7 @@ class Item(object):
                  collectable=True, 
                  examine_text="", 
                  location=None):
-
+        global item_id
         # The name of the item
         self.name = name.lower()
         # The default description of the item.
@@ -24,6 +26,11 @@ class Item(object):
         if self.location:
             self.location.add_item(self.name, self)
         self.actions = {}
+        self.id = item_id
+        item_id += 1
+    
+    def __eq__(self, other):
+        return self.id == other.id
     
     # Change the location of the item
     def change_location(self, new_location):
@@ -51,6 +58,7 @@ class Item(object):
                 if not status[0]:
                     all_conditions_met = False
                     print(status[1])
+                    break
             if all_conditions_met:
                 result = function(arguments)
                 return result

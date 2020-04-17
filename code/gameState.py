@@ -1,19 +1,20 @@
 # Game State
 from character import Character
+from precondition import Precondition
 try:
     import queue
 except ImportError:
     import Queue as queue
 
-id = 0 # plot point id
+plot_id = 0 # plot point id
 class PlotPoint(object):
 
     def __init__(self, name, is_end=False, changes_to_make=[]):
-        global id
-        self.id = id
+        global plot_id
+        self.id = plot_id
         self.name = name
         self.is_end = is_end # Is this plot point an end point?
-        id += 1 # increment global id for unique ids per plot point
+        plot_id += 1 # increment global id for unique ids per plot point
         self.changes = changes_to_make # list of actions drama manager should do if player reaches this plot point
     
     def __eq__(self, other):
@@ -81,75 +82,88 @@ class Plot(object):
 
 class GameState(object):
 
-    def __init__(self, player, start_at, plot, npcs={}, locations={}):
+    def __init__(self, player, plot, npc_dict={}, location_dict={}):
         self.player = player
-        self.current_location = start_at
-        self.npcs = npcs
-        self.locations = locations
+        self.current_location = player.curr_location
+        self.npcs = npc_dict
+        self.locations = location_dict
         self.plot = plot
         self.current_plot_point = self.plot.start
 
     def is_condition_satisfied(self, condition):
-        # Condition = (condition text, condition element)
+        # Condition = Precondition(context = condition text, elems = condition element(s))
         # Depending on condition text, check if the given condition element satisfies the condition
         
         # Multiple if checks
         warning_text = ''
-        if condition[0] == 'item_in_player_inventory':
-            if self.player.check_item(condition[1]):
+        if condition.context == 'item_in_player_inventory':
+            if self.player.check_item(condition.elems):
                 return [True]
             else:
-                warning_text = "You don't have the %s" % condition[1].name
-        elif condition[0] == 'item_not_in_player_inventory':
-            if condition[1].name not in self.player.inventory:
+                warning_text = "You don't have the %s" % condition.elems.name
+        elif condition.context == 'item_not_in_player_inventory':
+            if condition.elems.name not in self.player.inventory:
                 return [True]
             else:
-                warning_text = "You have the %s" % condition[1].name
-        elif condition[0] == 'item_in_npc_inventory':
+                warning_text = "You have the %s" % condition.elems.name
+        elif condition.context == 'item_in_npc_inventory':
             # In this case, the condition[1] will be of type (npc, item) tuple
-            npc = condition[1][0]
-            if npc.check_item(condition[1][1]):
+            npc = condition.elems[0]
+            if npc.check_item(condition.elems[1]):
                 return [True]
             else:
-                warning_text = "%s doesn't have the %s" % (npc.name, condition[1][1].name)
-        elif condition[0] == 'item_in_location':
+                warning_text = "%s doesn't have the %s" % (npc.name, condition.elems[1].name)
+        elif condition.context == 'item_in_location':
             # In this case, the condition[1] will be of type (location, item) tuple
-            loc = condition[1][0]
-            if loc.check_item(condition[1][1]):
+            loc = condition.elems[0]
+            if loc.check_item(condition.elems[1]):
                 return [True]
             else:
-               warning_text = "%s isn't in the %s" % (condition[1][1].name, loc.name)
-        elif condition[0] == 'player_is_friends_with':
-            if condition[1].id in self.player.acquaintances:
+               warning_text = "%s isn't in the %s" % (condition.elems[1].name, loc.name)
+        elif condition.context == 'player_is_friends_with':
+            if condition.elems.id in self.player.acquaintances:
                 # In this case, the condition[1] will contain the NPC character
-                if self.player.relationship_status(condition[1]) in ['friend', 'good friend']:
+                if self.player.relationship_status(condition.elems) in ['friend', 'good friend']:
                     return [True]
+                else:
+                    warning_text = "You're not close enough with %s to perform this action." % condition.elems.name
             else:
-               warning_text = "You're not close enough with %s to perform this action." % condition[1].name
-        elif condition[0] == 'player_is_acquaintances_with':
+                warning_text = "You don't know %s yet." % condition.elems.name
+        elif condition.context == 'player_is_acquaintances_with':
             # In this case, the condition[1] will contain the NPC character
-            if condition[1].id in self.player.acquaintances:
+            if condition.elems.id in self.player.acquaintances:
                 return [True]
             else:
-                warning_text = "You haven't met %s yet." % condition[1].name
-        elif condition[0] == 'player_dislikes':
+                warning_text = "You haven't met %s yet." % condition.elems.name
+        elif condition.context == 'player_dislikes':
             # In this case, the condition[1] will contain the NPC character
-            if condition[1].id in self.player.acquaintances:
-                if self.player.relationship_status(condition[1]) == 'dislike':
+            if condition.elems.id in self.player.acquaintances:
+                if self.player.relationship_status(condition.elems) == 'dislike':
                     return [True]
+                else:
+                    warning_text = "You don't dislike %s enough to perform this action." % condition.elems.name
             else:
-                warning_text = "You don't dislike %s enough to perform this action." % condition[1].name
-        elif condition[0] == 'player_in_location':
+                warning_text = "You don't know %s yet." % condition.elems.name
+        elif condition.context == 'player_does_not_dislike':
+            # In this case, the condition[1] will contain the NPC character
+            if condition.elems.id in self.player.acquaintances:
+                if self.player.relationship_status(condition.elems) != 'dislike':
+                    return [True]
+                else:
+                    warning_text = "You're not on good terms enough with %s to perform this action." % condition.elems.name
+            else:
+                warning_text = "You don't know %s yet." % condition.elems.name
+        elif condition.context == 'player_in_location':
             # In this case, the condition[1] will be a location
-            if self.player.curr_location == condition[1]:
+            if self.player.curr_location == condition.elems:
                 return [True]
             else:
-               warning_text = "You're not in the %s" % condition[1].name
-        elif condition[0] == 'npc_in_location':
+               warning_text = "You're not in the %s" % condition.elems.name
+        elif condition.context == 'npc_in_location':
             # In this case, the condition[1] will be of type (npc, location) tuple
-            npc = condition[1][0]
-            if npc.curr_location == condition[1][1]:
+            npc = condition.elems[0]
+            if npc.curr_location == condition.elems[1]:
                 return [True]
             else:
-                warning_text = "%s is not in the %s" % (npc.name, condition[1][1].name)
+                warning_text = "%s is not in the %s" % (npc.name, condition.elems[1].name)
         return [False, warning_text]

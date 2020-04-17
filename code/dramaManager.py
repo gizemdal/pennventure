@@ -24,6 +24,8 @@ class DramaManager(object):
                 print('Items:')
                 for i in player_location.items.keys():
                     print('\t' + i + ' : ' + player_location.items[i].description)
+                for i in self.game_state.player.inventory.keys():
+                    print('\t' + i + ' : ' + self.game_state.player.inventory[i].description)
                 if len(player_location.characters.keys()) > 1:
                     print('People:')
                     for p in player_location.characters.keys():
@@ -44,7 +46,7 @@ class DramaManager(object):
             elif action[0] == 'go to location':
                 go_to_location = None
                 for loc in self.game_state.locations.keys():
-                    if action[1].lower() == loc:
+                    if action[1].lower() == self.game_state.locations[loc].name.lower():
                         go_to_location = self.game_state.locations[loc]
                         break
                 if go_to_location:
