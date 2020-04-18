@@ -4,6 +4,23 @@ from gameState import GameState
 
 loc_id = 0 # unique location id, assigned by creation order
 
+# Return the opposite of the direction
+def direction_opp(direction):
+    if direction == 'north':
+        return 'south'
+    elif direction == 'south':
+        return 'north'
+    elif direction == 'west':
+        return 'east'
+    elif direction == 'east':
+        return 'west'
+    elif direction == 'in':
+        return 'out'
+    elif direction == 'out':
+        return 'in'
+    else:
+        return None
+
 class Location(object):
 
     def __init__(self, name, description, isDiscovered=False):
@@ -96,16 +113,29 @@ class Location(object):
         # Condition = (condition text, condition element) tuple
         conditions = self.blocks[direction]
         for condition in conditions:
-            if not game_state.is_condition_satisfied(condition):
+            if not game_state.is_condition_satisfied(condition)[0]:
                 return True
         return False
     
     # Add a block at this location for given direction
-    def add_block(self, direction, description, condition):
-        if direction not in self.blocks:
-            self.blocks[direction] = [condition]
-        else:
-            self.blocks[direction] = self.blocks[direction].append(condition)
-        
+    def add_block(self, direction, condition):
+        # Allow adding blocks if there is another location at the given direction
+        # The opposite block should be added at the other location
+        # Returns True if block was added succesfully
+        if direction_opp(direction):
+            opposite = direction_opp(direction)
+            if direction not in self.connections:
+                return False
+            if opposite not in self.connections[direction].blocks:
+                self.connections[direction].blocks[opposite] = [condition]
+            else:
+                self.connections[direction].blocks[opposite] = self.connections[direction].blocks[opposite].append(condition)
+            if direction not in self.blocks:
+                self.blocks[direction] = [condition]
+            else:
+                self.blocks[direction] = self.blocks[direction].append(condition)
+            return True
+        return False
+            
 
         

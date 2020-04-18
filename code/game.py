@@ -127,6 +127,16 @@ class Game(object):
                         pre_npc = npcs[int(tokens[2][:-1])]
                         new_pre = Precondition('player_is_acquaintances_with', pre_npc)
                         preconditions[new_pre.id] = new_pre
+                elif tokens[0] == 'block':
+                    # get first location
+                    loc_from = locations[int(tokens[1])]
+                    direction = tokens[2]
+                    split_conditions = tokens[3].split('-')
+                    for condition in split_conditions:
+                        if condition[-1] != '\n':
+                            loc_from.add_block(direction, preconditions[int(condition)])
+                        else:
+                            loc_from.add_block(direction, preconditions[int(condition[:-1])])
                 elif tokens[0] == 'plot':
                     plot_name = tokens[1]
                     is_end = False
@@ -270,7 +280,7 @@ class Game(object):
 
         # Add connections
         bedroom.add_connection("out", hallway)
-        hallway.add_connection("in", bedroom)
+        #hallway.add_connection("in", bedroom)
 
         # Items
         phone = Item("cell phone", "Iphone", True, "IphoneX", location=bedroom)
@@ -278,6 +288,7 @@ class Game(object):
         vending_machine = Item("vending machine", "just a vending machine with snacks", False, "the variety of snacks is impressive.", location=hallway)
         snack = Item("snack", "delicious snack", False,"delicious snack", location=hallway)
         money = Item("Money", "money", True, "5 bucks", location=None)
+        key = Item("Key", 'key', True, 'Door key', location=bedroom)
 
         # Characters
 
@@ -314,6 +325,7 @@ class Game(object):
         rude_to_anna = Precondition('player_dislikes', anna)
         can_call_anna = Precondition('player_does_not_dislike', anna)
         in_bedroom = Precondition('player_in_location', bedroom)
+        player_has_key = Precondition('item_in_player_inventory', key)
         brian_around = Precondition('npc_in_location', (brian, hallway))
         talk_to_brian = Precondition('player_is_friends_with', brian)
         have_money = Precondition('item_in_player_inventory', money)
@@ -321,6 +333,9 @@ class Game(object):
         have_snack = Precondition('item_in_player_inventory', snack)
         anna_have_money = Precondition('item_in_npc_inventory', (anna, money))
         brian_have_money = Precondition('item_in_npc_inventory', (brian, money))
+
+        # Set up blocks
+        bedroom.add_block('out', player_has_key)
         
         # Set up the graph
         plot_graph.add_new_adjacent(plot_graph.start, anna_in_hallway, [called_anna])

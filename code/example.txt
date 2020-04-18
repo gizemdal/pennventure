@@ -1,7 +1,6 @@
 loc/Bedroom/You're standing in your small and cozy dorm bedroom./1
 loc/Hallway/You're standing in the middle of the hallway in front of your door.\n There is a vending machine accross./0
 con/0/1/out
-con/1/0/in
 item/Cell Phone/Iphone/1/IphoneX/0
 item/Vending Machine/Just a vending machine with snacks/0/The variety of snacks is impressive./1
 item/Snack/Delicious Snack/0/Delicious Snack/1

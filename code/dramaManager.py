@@ -41,8 +41,12 @@ class DramaManager(object):
         elif len(action) == 2:
             # check if it's direction
             if action[0] == 'direction' and action[1] in self.game_state.player.curr_location.connections:
-                self.game_state.player.set_location(self.game_state.player.curr_location.connections[action[1]])
-                self.game_state.current_location = self.game_state.player.curr_location
+                # check if the direction is blocked
+                if not self.game_state.player.curr_location.check_block(action[1], self.game_state):
+                    self.game_state.player.set_location(self.game_state.player.curr_location.connections[action[1]])
+                    self.game_state.current_location = self.game_state.player.curr_location
+                else:
+                    print('You cannot go in this direction. It is blocked.')
             elif action[0] == 'go to location':
                 go_to_location = None
                 for loc in self.game_state.locations.keys():

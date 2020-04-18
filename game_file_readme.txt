@@ -13,6 +13,7 @@ npc (npc character) -> npc name/-1
 rel (relationship) -> from char id/to char id/short term score/long term score
 inv (inventory) -> character id/item id
 pre (preconditions) -> precondition name/necessary ids
+block (block) -> from location/direction/list of precondition ids
 plot (plot point) -> plot point name/is end? (1 = True, 0 = False)/list of changes to make (change_category-required_ids)
 adj (adjacency) -> from plot point id/to plot point id/precondition ids list
 action (special command) -> is item or npc (0 = item, 1 = npc)/item or npc id/command name/function name/arguments
