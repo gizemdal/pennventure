@@ -378,6 +378,7 @@ class Game(object):
         self.parser = Parser(drama_manager)
     
     def describe_current_location(self):
+        print(str(self.parser.drama_manager.game_state.player.curr_location.name) + ':')
         print(self.parser.drama_manager.game_state.player.curr_location.description)
         
     def describe_exits(self):
