@@ -430,13 +430,24 @@ class Game(object):
 def game_loop():
     print('Welcome to Pennventure! You will be trying to solve a puzzle provided.')
     print('Would you like to play the default game or upload a game file? Enter Default for default, otherwise enter whatever you wish.')
-    default_or_upload = raw_input('>')
+    default_or_upload = ''
+    try:
+        default_or_upload = raw_input('>')
+    except:
+        default_or_upload = input('>')
     file_name = ''
     if default_or_upload.lower() != 'default':
         print('Please enter the name of the file you would like to upload. Do not forget the file name extension!')
-        file_name = raw_input('>')
+        try:
+            file_name = raw_input('>')
+        except:
+            file_name = input('>')
     print('Awesome, let us start the game! You will be trying to solve a puzzle provided. First, let us start by getting your name.')
-    player_name = raw_input('Your name: ')
+    player_name = ''
+    try:
+        player_name = raw_input('Your name: ')
+    except:
+        player_name = input('Your name: ')
     print('Hello ' + player_name + '! Let us begin our adventure...')
     game = Game(player_name, game_file=file_name) # Create new game instance
     game.describe()
@@ -447,8 +458,10 @@ def game_loop():
         if game.parser.drama_manager.game_state.current_location.name != prev_location:
             prev_location = game.parser.drama_manager.game_state.current_location.name
             game.describe()
-        
-        command = raw_input('>')
+        try:
+            command = raw_input('>')
+        except:
+            command = input('>')
         result = game.parser.parse_command(command)
         if result:
             break
