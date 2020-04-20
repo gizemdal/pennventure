@@ -2167,8 +2167,143 @@ class GameMaker(object):
         self.actions = []
 
     def create_game(self):
-        pass
-    
+        # First ask for player's starting location
+        print('Which starting location do you want the player to start from?')
+        print('Available locations: ' + str([loc.name for loc in self.locations.values()]))
+        loc_name = ''
+        loc_id = -1
+        is_valid_location = False
+        while not is_valid_location:
+            try:
+                loc_name = raw_input('>')
+            except:
+                loc_name = input('>')
+            if loc_name == 'ret':
+                return (False, 0)
+            elif loc_name == 'q':
+                return (False, 1)
+            else:
+                # Check if such location exists
+                loc_found = False
+                for loc in self.locations.values():
+                    if loc.name.lower() == loc_name.lower():
+                        loc_id = loc.id
+                        loc_found = True
+                        break
+                if not loc_found:
+                    print('No such location exists. Please try again.')
+                    continue
+                else:
+                    is_valid_location = True
+        # Now start writing in the game file
+        f = open('game_file.txt', 'w')
+        # Write the locations
+        for (location_id, location) in self.locations.items():
+            is_discovered = 0
+            if location.isDiscovered:
+                is_discovered = 1
+            f.write('loc/' + str(location.name) + '/' + str(location.description) + '/' + str(is_discovered) + '\n')
+        # Write the connections
+        for connection in self.connections:
+            f.write('con/' + str(connection[0]) + '/' + str(connection[1]) + '/' + connection[2] + '\n')
+        # Write the items
+        for (item_id, item) in self.items.items():
+            is_gettable = 0
+            if item.collectable:
+                is_gettable = 1
+            loc_id = -1
+            if item.location:
+                loc_id = item.location.id
+            f.write('item/' + str(item.name) + '/' + str(item.description) + '/' + str(is_gettable) + '/' + str(item.examine) + '/' + str(loc_id) + '\n')
+        # Write the player
+        f.write('player/' + str(self.player.name) + '/' + str(self.player.curr_location.id) + '\n')
+        # Write the npcs
+        for (npc_id, npc) in self.characters.items():
+            npc_loc = -1
+            if npc.curr_location:
+                npc_loc = npc.curr_location.id
+            f.write('npc/' + str(npc.name) + '/' + str(npc_loc) + '\n')
+        # Write the relationships
+        for rel in self.relationships:
+            f.write('rel/' + str(rel[0]) + '/' + str(rel[1]) + '/' + str(rel[2]) + '/' + str(rel[3]) + '\n')
+        # Write the inventory
+        for i in self.inventory:
+            f.write('inv/' + str(i[0]) + '/' + str(i[1]) + '\n')
+        # Write the preconditions
+        for (pre_id, pre) in self.preconditions.items():
+            context = pre.context
+            if context == 'item_in_player_inventory':
+                f.write('pre/item_in_player_inventory/' + str(pre.elems[0]) + '\n')
+            elif context == 'item_not_in_player_inventory':
+                f.write('pre/item_not_in_player_inventory/' + str(pre.elems[0]) + '\n')
+            elif context == 'item_in_npc_inventory':
+                f.write('pre/item_in_npc_inventory/' + str(pre.elems[0]) + '/' + str(pre.elems[1]) + '\n')
+            elif context == 'item_in_location':
+                f.write('pre/item_in_location/' + str(pre.elems[0]) + '/' + str(pre.elems[1]) + '\n')
+            elif context == 'player_is_friends_with':
+                f.write('pre/player_is_friends_with/' + str(pre.elems[0]) + '\n')
+            elif context == 'player_is_acquaintances_with':
+                f.write('pre/player_is_acquaintances_with/' + str(pre.elems[0]) + '\n')
+            elif context == 'player_dislikes':
+                f.write('pre/player_dislikes/' + str(pre.elems[0]) + '\n')
+            elif context == 'player_does_not_dislike':
+                f.write('pre/player_does_not_dislike/' + str(pre.elems[0]) + '\n')
+            elif context == 'player_in_location':
+                f.write('pre/player_in_location/' + str(pre.elems[0]) + '\n')
+            elif context == 'npc_in_location':
+                f.write('pre/npc_in_location/' + str(pre.elems[0]) + '/' + str(pre.elems[1]) + '\n')
+        # Write the plot points
+        for (plot_id, plot) in self.plot_points:
+            is_end = 0
+            if plot.is_end:
+                is_end = 1
+            txt = 'plot/' + str(plot.name) + '/' + str(is_end) + '/' + str(plot.message)
+            # Check if there are any changes
+            for change in plot.changes_to_make:
+                if change[0] == 'set_npc_location_none':
+                    txt = txt + '/set_npc_location_none-' + str(change[1])
+                elif change[0] == 'bring_npc_to':
+                    txt = txt + '/bring_npc_to-' + str(change[1]) + '-' + str(change[2])
+            txt += '\n'
+            f.write(txt)
+        # Write the adjacents
+        for adj in self.adjacencies:
+            txt = 'adj/' + str(adj[0]) + '/' + str(adj[1]) + '/'
+            for pre in adj[2]:
+                txt = txt + str(pre) + '-'
+            txt = txt[:-1]
+            txt += '\n'
+            f.write(txt)
+        # Write the actions
+        for action in self.actions:
+            txt = 'action/' + str(action[0]) + '/' + str(action[1]) + '/' + str(action[2]) + '/' + str(action[3]) + '/'
+            if action[3] == 'describe something':
+                txt = txt + str(action[4])
+            elif action[3] == 'call to location':
+                txt = txt + str(action[4]) + '/' + str(action[5]) + '/' + str(action[6]) + '/' + str(action[7]) + '/'
+                for pre in action[8]:
+                    txt = txt + str(pre) + '-'
+                txt = txt[:-1]
+            elif action[3] == 'interaction with person':
+                txt = txt + str(action[4]) + '/' + str(action[5]) + '/' + str(action[6]) + '/' + str(action[7]) + '/'
+                for pre in action[8]:
+                    txt = txt + str(pre) + '-'
+                txt = txt[:-1]
+            elif action[3] == 'ask for item':
+                txt = txt + str(action[4]) + '/' + str(action[5]) + '/' + str(action[6]) + '/' + str(action[7]) + '/' + str(action[8]) + '/'
+                for pre in action[9]:
+                    txt = txt + str(pre) + '-'
+                txt = txt[:-1]
+            elif action[3] == 'redeem item':
+                txt = txt + str(action[4]) + '/' + str(action[5]) + '/' + str(action[6]) + '/' + str(action[7]) + '/'
+                for pre in action[8]:
+                    txt = txt + str(pre) + '-'
+                txt = txt[:-1]
+            txt += '\n'
+            f.write(txt)
+        # Writing complete
+        print('Game file generated successfully.')
+        f.close()
 
 # Start maker here
 game_maker = GameMaker()
@@ -2277,6 +2412,7 @@ while True:
             elems = result[3:]
             new_precondition = Precondition(result_category, elems, result[1])
             game_maker.preconditions[new_precondition.id] = new_precondition
+            print(elems)
             print('Precondition added successfully!')
     elif entered.lower() == 'h':
         result = valid_plot_point(game_maker)
@@ -2318,8 +2454,7 @@ while True:
             game_maker.actions.append(result[1:])
             print('Action added successfully!')
     elif entered.lower() == 'l':
-        # ASK FOR PLAYER START LOCATION
-        print('This option is not implemented yet.')
+        game_maker.create_game()
     elif entered.lower() == 'm':
         # Check added components
         # PUT THIS ALL IN ANOTHER FUNCTION
