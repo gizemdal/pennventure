@@ -131,6 +131,7 @@ def valid_character(maker):
     # Now set their start location
     print('Please enter the name of the (previously added) location your character should be at in the beginning of the game:')
     print('(If you want the location to be None, just hit enter without typing anything.)')
+    print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
     npc_loc = ''
     loc_id = -1
     is_valid_npc_location = False
@@ -166,6 +167,7 @@ def valid_character(maker):
 def valid_connection(maker):
     # First get the from location
     print('Please enter the name of the location you want the direction of connection to go FROM:')
+    print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
     from_loc = ''
     from_loc_id = -1
     is_from_loc_valid = False
@@ -193,6 +195,7 @@ def valid_connection(maker):
                 is_from_loc_valid = True
     # Now get the to location
     print('Please enter the name of the location you want the direction of connection to go TO:')
+    print('Available locations: ' + str([loc.name for loc in maker.locations.values() if loc.name.lower() != from_loc.lower()]))
     to_loc = ''
     to_loc_id = -1
     is_to_loc_valid = False
@@ -249,6 +252,7 @@ def valid_connection(maker):
 def valid_relationship(maker):
     print('Please enter the name of your character.') 
     print('If your character is the player, just hit enter.')
+    print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
     char_name_1 = ''
     char_id_1 = 0
     is_char_1_valid = False
@@ -272,7 +276,7 @@ def valid_relationship(maker):
                 for char in maker.characters.values():
                     if char.id == 0:
                         continue
-                    if char.name.lower() == char_name_1:
+                    if char.name.lower() == char_name_1.lower():
                         char_id_1 = char.id
                         char_found = True
                         break
@@ -284,6 +288,7 @@ def valid_relationship(maker):
     # Now get the second character
     print('Please enter the name of the other character you want to set a relationship score with.') 
     print('If your character is the player, just hit enter.')
+    print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player' if n.name.lower() != char_name_1.lower()]))
     char_name_2 = ''
     char_id_2 = 0
     is_char_2_valid = False
@@ -311,7 +316,7 @@ def valid_relationship(maker):
                 for char in maker.characters.values():
                     if char.id == 0:
                         continue
-                    if char.name.lower() == char_name_2:
+                    if char.name.lower() == char_name_2.lower():
                         char_id_2 = char.id
                         char_found = True
                         break
@@ -479,6 +484,7 @@ def valid_item(maker):
     # Now get the start location
     print('Please enter the name of the (previously added) location your item should be at in the beginning of the game:')
     print('(If you want the location to be None, just hit enter without typing anything.)')
+    print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
     item_loc = ''
     loc_id = -1
     is_valid_item_location = False
@@ -514,6 +520,7 @@ def valid_item(maker):
 def valid_inventory(maker):
     # Get the item
     print('Please enter the name of the item you want to put in an inventory:')
+    print('Available items: ' + str([item.name for item in maker.items.values()]))
     item_name = ''
     item_id = 0
     is_item_name_valid = False
@@ -542,6 +549,7 @@ def valid_inventory(maker):
     # Get the character
     print('Please enter the name of the character whose inventory you want to put this item to.')
     print('If your character is the player, just hit enter.')
+    print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
     npc_name = ''
     npc_id = 0
     is_npc_name_valid = False
@@ -565,7 +573,7 @@ def valid_inventory(maker):
                 for char in maker.characters.values():
                     if char.id == 0:
                         continue
-                    if char.name.lower() == npc_name:
+                    if char.name.lower() == npc_name.lower():
                         npc_id = char.id
                         char_found = True
                         break
@@ -607,27 +615,620 @@ def valid_precondition(maker):
                 print('Invalid category. Please try again.')
     # Now determine what is needed for the precondition category
     if category == 'a':
-        # Need location
-        pass
+        print('Enter the name of the location:')
+        print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
+        # Get player location
+        player_loc = ''
+        loc_id = -1
+        is_valid_player_location = False
+        while not is_valid_player_location:
+            try:
+                player_loc = raw_input('>')
+            except:
+                player_loc = input('>')
+            if player_loc == 'ret':
+                return (False, 0)
+            elif player_loc == 'q':
+                return (False, 1)
+            else:
+                # Check if such location exists
+                loc_found = False
+                for loc in maker.locations.values():
+                    if loc.name.lower() == player_loc.lower():
+                        loc_id = loc.id
+                        loc_found = True
+                        break
+                if not loc_found:
+                    print('No such location exists. Please try again.')
+                    continue
+                else:
+                    is_valid_player_location = True
+        return (True, 'player_in_location', loc_id)
     elif category == 'b':
-        pass
+        print('Enter the name of the NPC:')
+        print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
+        # Get npc name
+        npc_name = ''
+        npc_id = 0
+        is_npc_name_valid = False
+        while not is_npc_name_valid:
+            try:
+                npc_name = raw_input('>')
+            except:
+                npc_name = input('>')
+            if npc_name == 'ret':
+                return (False, 0)
+            elif npc_name == 'q':
+                return (False, 1)
+            else:
+                # Check if character exists
+                char_found = False
+                for char in maker.characters.values():
+                    if char.id == 0:
+                        continue
+                    if char.name.lower() == npc_name.lower():
+                        npc_id = char.id
+                        char_found = True
+                        break
+                if not char_found:
+                    print('You do not have a character with this name. Please try again.')
+                    continue
+                else:
+                    is_npc_name_valid = True
+        print('Enter the name of the location:')
+        print('If the location is None, just hit enter')
+        print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
+        # Get npc location
+        npc_loc = ''
+        loc_id = -1
+        is_valid_npc_location = False
+        while not is_valid_npc_location:
+            try:
+                npc_loc = raw_input('>')
+            except:
+                npc_loc = input('>')
+            if npc_loc == 'ret':
+                return (False, 0)
+            elif npc_loc == 'q':
+                return (False, 1)
+            else:
+                # Check if location == None
+                if len(npc_loc) == 0:
+                    loc_id = -1
+                    is_valid_npc_location = True
+                else:
+                    # Check if such location exists
+                    loc_found = False
+                    for loc in maker.locations.values():
+                        if loc.name.lower() == npc_loc.lower():
+                            loc_id = loc.id
+                            loc_found = True
+                            break
+                    if not loc_found:
+                        print('No such location exists. Please try again.')
+                        continue
+                    else:
+                        is_valid_npc_location = True
+        return (True, 'npc_in_location', npc_id, loc_id)
     elif category == 'c':
-        pass
+        # Item in player inventory
+        print('Enter the name of the item:')
+        print('Available items: ' + str([item.name for item in maker.items.values()]))
+        item_name = ''
+        item_id = 0
+        is_item_name_valid = False
+        while not is_item_name_valid:
+            try:
+                item_name = raw_input('>')
+            except:
+                item_name = input('>')
+            if item_name == 'ret':
+                return (False, 0)
+            elif item_name == 'q':
+                return (False, 1)
+            else:
+                # Check if the item exists
+                item_exists = False
+                for (item_id, item) in maker.items.items():
+                    if item.name.lower() == item_name.lower():
+                        item_exists = True
+                        item_id = item.id
+                        break
+                if not item_exists:
+                    print('No such item exists. Please try again.')
+                    continue
+                else:
+                    is_item_name_valid = True
+        return (True, 'item_in_player_inventory', item_id)
     elif category == 'd':
-        pass
+        # Item in NPC inventory
+        print('Enter the name of the item:')
+        print('Available items: ' + str([item.name for item in maker.items.values()]))
+        item_name = ''
+        item_id = 0
+        is_item_name_valid = False
+        while not is_item_name_valid:
+            try:
+                item_name = raw_input('>')
+            except:
+                item_name = input('>')
+            if item_name == 'ret':
+                return (False, 0)
+            elif item_name == 'q':
+                return (False, 1)
+            else:
+                # Check if the item exists
+                item_exists = False
+                for (item_id, item) in maker.items.items():
+                    if item.name.lower() == item_name.lower():
+                        item_exists = True
+                        item_id = item.id
+                        break
+                if not item_exists:
+                    print('No such item exists. Please try again.')
+                    continue
+                else:
+                    is_item_name_valid = True
+        # Get the NPC
+        print('Enter the name of the NPC:')
+        print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
+        npc_name = ''
+        npc_id = 0
+        is_npc_name_valid = False
+        while not is_npc_name_valid:
+            try:
+                npc_name = raw_input('>')
+            except:
+                npc_name = input('>')
+            if npc_name == 'ret':
+                return (False, 0)
+            elif npc_name == 'q':
+                return (False, 1)
+            else:
+                # Check if character exists
+                char_found = False
+                for char in maker.characters.values():
+                    if char.id == 0:
+                        continue
+                    if char.name.lower() == npc_name.lower():
+                        npc_id = char.id
+                        char_found = True
+                        break
+                if not char_found:
+                    print('You do not have a character with this name. Please try again.')
+                    continue
+                else:
+                    is_npc_name_valid = True
+        return (True, 'item_in_npc_inventory', npc_id, item_id)
     elif category == 'e':
-        pass
+        # Get item name
+        print('Enter the name of the item:')
+        print('Available items: ' + str([item.name for item in maker.items.values()]))
+        item_name = ''
+        item_id = 0
+        is_item_name_valid = False
+        while not is_item_name_valid:
+            try:
+                item_name = raw_input('>')
+            except:
+                item_name = input('>')
+            if item_name == 'ret':
+                return (False, 0)
+            elif item_name == 'q':
+                return (False, 1)
+            else:
+                # Check if the item exists
+                item_exists = False
+                for (item_id, item) in maker.items.items():
+                    if item.name.lower() == item_name.lower():
+                        item_exists = True
+                        item_id = item.id
+                        break
+                if not item_exists:
+                    print('No such item exists. Please try again.')
+                    continue
+                else:
+                    is_item_name_valid = True
+        return (True, 'item_not_in_player_inventory', item_id)
     elif category == 'f':
-        pass
-    elif category == 'g':
-        pass
-    elif category == 'h':
-        pass
-    elif category == 'i':
-        pass
-    elif category == 'j':
-        pass
-    return (False, 1)
+        # Get the item
+        print('Enter the name of the item:')
+        print('Available items: ' + str([item.name for item in maker.items.values()]))
+        item_name = ''
+        item_id = 0
+        is_item_name_valid = False
+        while not is_item_name_valid:
+            try:
+                item_name = raw_input('>')
+            except:
+                item_name = input('>')
+            if item_name == 'ret':
+                return (False, 0)
+            elif item_name == 'q':
+                return (False, 1)
+            else:
+                # Check if the item exists
+                item_exists = False
+                for (item_id, item) in maker.items.items():
+                    if item.name.lower() == item_name.lower():
+                        item_exists = True
+                        item_id = item.id
+                        break
+                if not item_exists:
+                    print('No such item exists. Please try again.')
+                    continue
+                else:
+                    is_item_name_valid = True
+        # Get the location
+        print('Please enter the location name:')
+        print('(If you want the location to be None, just hit enter without typing anything.)')
+        print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
+        item_loc = ''
+        loc_id = -1
+        is_valid_item_location = False
+        while not is_valid_item_location:
+            try:
+                item_loc = raw_input('>')
+            except:
+                item_loc = input('>')
+            if item_loc == 'ret':
+                return (False, 0)
+            elif item_loc == 'q':
+                return (False, 1)
+            else:
+                if len(item_loc) == 0:
+                    # Set location to None
+                    loc_id = -1
+                    is_valid_item_location = True
+                else:
+                    # Check if such location exists
+                    loc_found = False
+                    for loc in maker.locations.values():
+                        if loc.name.lower() == item_loc.lower():
+                            loc_id = loc.id
+                            loc_found = True
+                            break
+                    if not loc_found:
+                        print('No such location exists. Please try again.')
+                        continue
+                    else:
+                        is_valid_item_location = True
+        return (True, 'item_in_location', loc_id, item_id)
+    elif category in 'ghij':
+        # Get the NPC
+        print('Enter the name of the NPC:')
+        print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
+        npc_name = ''
+        npc_id = 0
+        is_npc_name_valid = False
+        while not is_npc_name_valid:
+            try:
+                npc_name = raw_input('>')
+            except:
+                npc_name = input('>')
+            if npc_name == 'ret':
+                return (False, 0)
+            elif npc_name == 'q':
+                return (False, 1)
+            else:
+                # Check if character exists
+                char_found = False
+                for char in maker.characters.values():
+                    if char.id == 0:
+                        continue
+                    if char.name.lower() == npc_name.lower():
+                        npc_id = char.id
+                        char_found = True
+                        break
+                if not char_found:
+                    print('You do not have a character with this name. Please try again.')
+                    continue
+                else:
+                    is_npc_name_valid = True
+        if category == 'g':
+            return (True, 'player_is_friends_with', npc_id)
+        elif category == 'h':
+            return (True, 'player_is_acquaintances_with', npc_id)
+        elif category == 'i':
+            return (True, 'player_dislikes', npc_id)
+        elif category == 'j':
+            return (True, 'player_does_not_dislike', npc_id)
+        else:
+            return (False, 0)
+    else:  
+        return (False, 0)
+
+def query_npc(maker):
+    print('Please enter the name of the NPC:')
+    print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
+    npc_name = ''
+    npc_id = 0
+    is_npc_name_valid = False
+    while not is_npc_name_valid:
+        try:
+            npc_name = raw_input('>')
+        except:
+            npc_name = input('>')
+        if npc_name == 'ret':
+            return (False, 0)
+        elif npc_name == 'q':
+            return (False, 1)
+        else:
+            # Check if character exists
+            char_found = False
+            for char in maker.characters.values():
+                if char.id == 0:
+                    continue
+                if char.name.lower() == npc_name.lower():
+                    npc_id = char.id
+                    char_found = True
+                    break
+            if not char_found:
+                print('You do not have a character with this name. Please try again.')
+                continue
+            else:
+                is_npc_name_valid = True
+    return (True, npc_id)
+
+def query_location(maker):
+    print('Please enter the location name:')
+    print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
+    loc_name = ''
+    loc_id = -1
+    is_valid_location_name = False
+    while not is_valid_location_name:
+        try:
+            loc_name = raw_input('>')
+        except:
+            loc_name = input('>')
+        if loc_name == 'ret':
+            return (False, 0)
+        elif loc_name == 'q':
+            return (False, 1)
+        else:
+            if len(loc_name) == 0:
+                print("Use the 'Set NPC Location to None' category for this. Please try again.")
+            else:
+                # Check if such location exists
+                loc_found = False
+                for loc in maker.locations.values():
+                    if loc.name.lower() == loc_name.lower():
+                        loc_id = loc.id
+                        loc_found = True
+                        break
+                if not loc_found:
+                    print('No such location exists. Please try again.')
+                    continue
+                else:
+                    is_valid_location_name = True
+    return (True, loc_id)
+
+
+def valid_plot_point(maker):
+    print('Welcome to plot point maker! Here you can create plot points for your plot graph to be used by the drama manager.')
+    print('Although the point adjacencies has to be defined later, the very first plot point you create will be your starting point by default.')
+    print('Please enter a name for your new plot point:')
+    plot_name = ''
+    is_valid_plot_name = False
+    while not is_valid_plot_name:
+        try:
+            plot_name = raw_input('>')
+        except:
+            plot_name = input('>')
+        if plot_name == 'ret':
+            return (False, 0)
+        elif plot_name == 'q':
+            return (False, 1)
+        else:
+            # Plot names must have at least one ASCII character   
+            # Check if the name contains at least one ascii characher
+            ascii_found = False
+            for c in plot_name:
+                if c.lower() in string.ascii_lowercase:
+                    ascii_found = True
+                    break
+            if not ascii_found:
+                print('The plot point name must contain at least 1 ASCII character. Please try again.')
+                continue
+            else:
+                # Check if plot name already exists
+                # Check if a character with given name already exists
+                same_name_found = False
+                for (plot_id, plot) in maker.plot_points.items():
+                    if plot.name.lower() == plot_name.lower():
+                        same_name_found = True
+                        print('You already added a plot point with this name.')
+                        break
+                if not same_name_found:
+                    is_valid_plot_name = True
+    print('Write a text that should be printed once the player reaches this plot point.')
+    print('If you do not want to add any text, just hit Enter.')
+    message = ''
+    try:
+        message = raw_input('>')
+    except:
+        message = input('>')
+    if plot_name == 'ret':
+        return (False, 0)
+    elif plot_name == 'q':
+        return (False, 1)
+    print('Do you want the game to end when player reaches this plot point?')
+    print("Please enter either 'yes' or 'no':")
+    is_end = ''
+    is_valid_end = False
+    while not is_valid_end:
+        try:
+            is_end = raw_input('>')
+        except:
+            is_end = input('>')
+        if is_end == 'ret':
+            return (False, 0)
+        elif is_end == 'q':
+            return (False, 1)
+        else:
+            if is_end.lower() == 'yes' or is_end.lower() == 'no':
+                is_valid_end = True
+            else:
+                print("Please enter either 'yes' or 'no'.")
+                continue
+    changes = []
+    category = ''
+    is_changes_done = False
+    print('Please pick one of the categories below. If you are done adding changes or do not want to add any at all, just hit Enter.')
+    print('\ta) Set NPC location to None')
+    print('\tb) Bring NPC to location')
+    while not is_changes_done:
+        try:
+            category = raw_input('>')
+        except:
+            category = input('>')
+        if category == 'ret':
+            return (False, 0)
+        elif category == 'q':
+            return (False, 1)
+        else:
+            if len(category) == 0:
+                # User pressed Enter, done adding
+                is_changes_done = True
+            else:
+                if category == 'a':
+                    # Set NPC location to None
+                    info = query_npc(maker)
+                    if not info[0]:
+                        return info
+                    else:
+                        changes.append(('set_npc_location_none', info[1]))
+                        print('Set NPC location to None change added!')
+                        print('Please pick one of the categories below. If you are done adding changes or do not want to add any at all, just hit Enter.')
+                        print('\ta) Set NPC location to None')
+                        print('\tb) Bring NPC to location')
+                elif category == 'b':
+                    # Bring NPC to location
+                    info = query_npc(maker)
+                    if not info[0]:
+                        return info
+                    else:
+                        info_2 = query_location(maker)
+                        if not info_2[0]:
+                            return info_2
+                        else:
+                            changes.append(('bring_npc_to', info_2[1], info_2[2]))
+                            print('Bring NPC to location change added!')
+                            print('Please pick one of the categories below. If you are done adding changes or do not want to add any at all, just hit Enter.')
+                            print('\ta) Set NPC location to None')
+                            print('\tb) Bring NPC to location')
+                else:
+                    print('Invalid category! Please try again.')
+    # return everything
+    return (True, plot_name, is_end, changes, message)
+
+def valid_adjacency(maker):
+    print('Please enter the name of the FROM plot point:')
+    print('Available plot points: ' + str([plot.name for plot in game_maker.plot_points.values()]))
+    from_plot = ''
+    from_plot_id = -1
+    is_from_plot_valid = False
+    while not is_from_plot_valid:
+        try:
+            from_plot = raw_input('>')
+        except:
+            from_plot = input('>')
+        if from_plot == 'ret':
+            return (False, 0)
+        elif from_plot == 'q':
+            return (False, 1)
+        else:
+            # Check if plot name exists
+            plot_found = False
+            for (plot_id, plot) in maker.plot_points.items():
+                if plot.name.lower() == from_plot.lower():
+                    from_plot_id = plot.id
+                    plot_found = True
+                    break
+            if not plot_found:
+                print('No such plot point exists. Please try again.')
+            else:
+                is_from_plot_valid = True
+    print('Please enter the name of the TO plot point:')
+    print('Available plot points: ' + str([plot.name for plot in game_maker.plot_points.values() if plot.name.lower() != from_plot.lower()]))
+    to_plot = ''
+    to_plot_id = -1
+    is_to_plot_valid = False
+    while not is_to_plot_valid:
+        try:
+            to_plot = raw_input('>')
+        except:
+            to_plot = input('>')
+        if to_plot == 'ret':
+            return (False, 0)
+        elif to_plot == 'q':
+            return (False, 1)
+        else:
+            # from and to cannot be the same
+            if to_plot.lower() == from_plot.lower():
+                print('FROM and TO plot points cannot be the same. Please try again.')
+                continue
+            # Check if plot name exists
+            plot_found = False
+            for (plot_id, plot) in maker.plot_points.items():
+                if plot.name.lower() == to_plot.lower():
+                    to_plot_id = plot.id
+                    plot_found = True
+                    break
+            if not plot_found:
+                print('No such plot point exists. Please try again.')
+            else:
+                is_to_plot_valid = True
+    print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
+    print('If you are done adding preconditions, just hit Enter.')
+    print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values()]))
+    preconditions = []
+    is_preconditions_done = False
+    pre_name = ''
+    pre_id = -1
+    while not is_preconditions_done:
+        try:
+            pre_name = raw_input('>')
+        except:
+            pre_name = input('>')
+        if pre_name == 'ret':
+            return (False, 0)
+        elif pre_name == 'q':
+            return (False, 1)
+        else:
+            if len(pre_name) == 0:
+                # User hit Enter
+                is_preconditions_done = True
+                continue
+            # Check if precondition exists
+            pre_found = False
+            for (cond_id, pre) in maker.preconditions.items():
+                if pre.name.lower() == pre_name.lower():
+                    pre_id = cond_id
+                    pre_found = True
+                    break
+            if not pre_found:
+                print('No such precondition exists. Please try again.')
+                print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
+                print('If you are done adding preconditions, just hit Enter.')
+                print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values() if pre.id not in preconditions]))
+            else:
+                # Check if this precondition was already added
+                if pre_id in preconditions:
+                    print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
+                    print('No such precondition exists. Please try again.')
+                    print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
+                    print('If you are done adding preconditions, just hit Enter.')
+                    print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                else:
+                    preconditions.append(pre_id)
+                    print('Precondition added successfully!')
+                    print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
+                    print('No such precondition exists. Please try again.')
+                    print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
+                    print('If you are done adding preconditions, just hit Enter.')
+                    print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values() if pre.id not in preconditions]))
+    return (True, from_plot_id, to_plot_id, preconditions)
 
 class GameMaker(object):
 
@@ -640,12 +1241,12 @@ class GameMaker(object):
         self.items = {}
         self.plot_points = {}
         self.preconditions = {}
-        self.plot = None
         # fields for objects
         self.blocks = []
         self.connections = []
         self.relationships = []
         self.inventory = []
+        self.adjacencies = []
 
     def create_game(self):
         pass
@@ -727,17 +1328,14 @@ while True:
                 break
         else:
             # extract gettable
-            is_gettable = None
-            if result[3] == 'yes':
-                is_gettable  = True
-            else:
-                is_gettable  = False
+            is_gettable = result[3] == 'yes'
              # extract the location
             item_location = None
             if result[5] > -1:
                 item_location = game_maker.locations[result[5]]
             # Create item
             new_item = Item(result[1], result[2], is_gettable, result[4], item_location)
+            game_maker.items[new_item.id] = new_item
             print(str(result[1]) + ' is added to items!')
     elif entered.lower() == 'f':
         result = valid_inventory(game_maker)
@@ -756,16 +1354,39 @@ while True:
                 print('Goodbye')
                 break
         else:
-            pass
+            # Add precondition
+            result_category = result[1]
+            elems = result[2:]
+            new_precondition = Precondition(result_category, elems)
+            game_maker.preconditions[new_precondition.id] = new_precondition
+            print('Precondition added successfully!')
     elif entered.lower() == 'h':
-        print('This option is not implemented yet.')
+        result = valid_plot_point(game_maker)
+        if not result[0]:
+            if result[1] == 1:
+                print('Goodbye')
+                break
+        else:
+            # extract is_end
+            is_end = result[2] == 'yes'
+            new_plot_point = PlotPoint(result[1], is_end, result[3], result[4])
+            game_maker.plot_points[new_plot_point.id] = new_plot_point
+            print('Plot point added successfully!')
     elif entered.lower() == 'i':
-        print('This option is not implemented yet.')
+        result = valid_adjacency(game_maker)
+        if not result[0]:
+            if result[1] == 1:
+                print('Goodbye')
+                break
+        else:
+            game_maker.adjacencies.append((result[1], result[2], result[3]))
+            print('Adjacency added successfully!')
     elif entered.lower() == 'j':
         print('This option is not implemented yet.')
     elif entered.lower() == 'k':
         print('This option is not implemented yet.')
     elif entered.lower() == 'l':
+        # ASK FOR PLAYER START LOCATION
         print('This option is not implemented yet.')
     elif entered.lower() == 'm':
         # Check added components
@@ -774,7 +1395,7 @@ while True:
         print('Connections: ')
         print('NPCs: ' + str([n.name for n in game_maker.characters.values()]))
         print('Items: ' + str([item.name for item in game_maker.items.values()]))
-        print('Plot:')
+        print('Plot points: ' + str([plot.name for plot in game_maker.plot_points.values()]))
     elif entered.lower() == 'n':
         print('This option is not implemented yet.')
     else:

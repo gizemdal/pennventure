@@ -9,14 +9,15 @@ except ImportError:
 plot_id = 0 # plot point id
 class PlotPoint(object):
 
-    def __init__(self, name, is_end=False, changes_to_make=[]):
+    def __init__(self, name, is_end=False, changes_to_make=[], message=""):
         global plot_id
         self.id = plot_id
         self.name = name
         self.is_end = is_end # Is this plot point an end point?
         plot_id += 1 # increment global id for unique ids per plot point
         self.changes = changes_to_make # list of actions drama manager should do if player reaches this plot point
-    
+        self.message = message # What should be printed when the player reaches here?
+
     def __eq__(self, other):
         return self.id == other.id
     

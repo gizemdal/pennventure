@@ -24,13 +24,13 @@ pre/item_not_in_player_inventory/3
 pre/item_in_player_inventory/2
 pre/item_in_npc_inventory/1/3
 pre/item_in_npc_inventory/2/3
-plot/START/0
-plot/Anna in hallway/0
-plot/Go back in to bedroom/0/set_npc_location_none-1
-plot/Player in bedroom/0/bring_npc_to-2-1
-plot/Brian in hallway/0
-plot/Can buy snack/0/set_npc_location_none-2/set_npc_location_none-1
-plot/END/1
+plot/START/0/
+plot/Anna in hallway/0/
+plot/Go back in to bedroom/0//set_npc_location_none-1
+plot/Player in bedroom/0//bring_npc_to-2-1
+plot/Brian in hallway/0/
+plot/Can buy snack/0//set_npc_location_none-2/set_npc_location_none-1
+plot/END/1/You win!
 adj/0/1/0
 adj/1/5/1-7
 adj/1/2/2-8

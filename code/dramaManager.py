@@ -122,6 +122,8 @@ class DramaManager(object):
                     break
             if all_conditions_satisfied:
                 self.game_state.current_plot_point = self.game_state.plot.plot_points[adj[0]]
+                if len(self.game_state.current_plot_point.message) > 0:
+                    print(self.game_state.current_plot_point.message)
                 if self.game_state.current_plot_point.is_end:
                     game_end = True
                 break

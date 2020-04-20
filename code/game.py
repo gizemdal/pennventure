@@ -140,10 +140,12 @@ class Game(object):
                 elif tokens[0] == 'plot':
                     plot_name = tokens[1]
                     is_end = False
+                    message = ''
                     changes_to_make = []
-                    if len(tokens) > 3:
+                    if len(tokens) > 4:
                         is_end = bool(int(tokens[2]))
-                        for i in range (3, len(tokens)):
+                        message = tokens[3]
+                        for i in range (4, len(tokens)):
                             split_changes = tokens[i].split('-')
                             if split_changes[0] == 'set_npc_location_none':
                                 if split_changes[1][-1] != '\n':
@@ -156,8 +158,9 @@ class Game(object):
                                 else:
                                     changes_to_make.append(('bring_npc_to', (npcs[int(split_changes[1])], locations[int(split_changes[2][:-1])])))
                     else:
-                        is_end = bool(int(tokens[2][:-1]))
-                    new_plot_point = PlotPoint(plot_name, is_end, changes_to_make)
+                        is_end = bool(int(tokens[2]))
+                        message = tokens[3][:-1]
+                    new_plot_point = PlotPoint(plot_name, is_end, changes_to_make, message)
                     plot_points[new_plot_point.id] = new_plot_point
                     if new_plot_point.id == 0:
                         # This is the START point
@@ -316,7 +319,7 @@ class Game(object):
         plot_graph.add_plot_point(brian_in_hallway)
         buy_snack = PlotPoint("Can buy snack", changes_to_make=[('set_npc_location_none', brian), ('set_npc_location_none', anna)])
         plot_graph.add_plot_point(buy_snack)
-        end_point = PlotPoint("END", is_end=True)
+        end_point = PlotPoint("END", is_end=True, message="You win!")
         plot_graph.add_plot_point(end_point)
 
         # Preconditions
