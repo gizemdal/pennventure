@@ -15,6 +15,7 @@ from precondition import Precondition
 # Import functions
 from functions import *
 import string
+from location import direction_opp
 
 def menu_options():
     print('Options:')
@@ -50,10 +51,16 @@ def valid_location(maker):
             return (False, 0)
         elif loc_name == 'q':
             return (False, 1)
-        elif len(loc_name) < 2:
-            print('Your location name cannot be less than 2 characters. Please try again.')
-            continue
         else:
+            # Check if the name contains at least one ascii characher
+            ascii_found = False
+            for c in loc_name:
+                if c.lower() in string.ascii_lowercase:
+                    ascii_found = True
+                    break
+            if not ascii_found:
+                print('The location name must contain at least 1 ASCII character. Please try again.')
+                continue
             same_name_found = False
             for (loc_id, loc) in maker.locations.items():
                 if loc.name.lower() == loc_name.lower():
@@ -244,7 +251,7 @@ def valid_connection(maker):
             print('This is not a valid direction. Please try again.')
             continue
         else:
-            is_valid_direc = False
+            is_valid_direc = True
     # Return the direction
     print('Awesome. Keep in mind that once a connection is added, its opposite direction will be added as well.')
     return (True, from_loc_id, to_loc_id, direc)
@@ -1216,19 +1223,264 @@ def valid_adjacency(maker):
                 # Check if this precondition was already added
                 if pre_id in preconditions:
                     print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
-                    print('No such precondition exists. Please try again.')
                     print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
                     print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values() if pre.id not in preconditions]))
                 else:
                     preconditions.append(pre_id)
                     print('Precondition added successfully!')
-                    print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
-                    print('No such precondition exists. Please try again.')
                     print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
                     print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values() if pre.id not in preconditions]))
     return (True, from_plot_id, to_plot_id, preconditions)
+
+def valid_block(maker):
+    print('Please enter the name of the location for the block:')
+    print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
+    loc_name = ''
+    loc_id = -1
+    is_valid_location_name = False
+    while not is_valid_location_name:
+        try:
+            loc_name = raw_input('>')
+        except:
+            loc_name = input('>')
+        if loc_name == 'ret':
+            return (False, 0)
+        elif loc_name == 'q':
+            return (False, 1)
+        else:
+            # Check if such location exists
+            loc_found = False
+            for loc in maker.locations.values():
+                if loc.name.lower() == loc_name.lower():
+                    loc_id = loc.id
+                    loc_found = True
+                    break
+            if not loc_found:
+                print('No such location exists. Please try again.')
+                continue
+            else:
+                is_valid_location_name = True
+    print('Please pick the direction of the block from your location.')
+    print('(If you do not see any directions, it could be either because you have no connections from this location yet or you already added blocks to available directions.)')
+    from_available = [con[2] for con in maker.connections if con[0] == loc_id]
+    valid_available_from = [direc for direc in from_available if direc not in [block[1] for block in maker.blocks]]
+    to_available = [con[2] for con in maker.connections if con[1] == loc_id]
+    valid_available_to = [direction_opp(direc) for direc in to_available if direction_opp(direc) not in [block[1] for block in maker.blocks]]
+    total_available = valid_available_from + valid_available_to
+    print('Available directions: ' + str(total_available))
+    direction = ''
+    is_valid_direction = False
+    while not is_valid_direction:
+        try:
+            direction = raw_input('>')
+        except:
+            direction = input('>')
+        if direction == 'ret':
+            return (False, 0)
+        elif direction == 'q':
+            return (False, 1)
+        else:
+            if direction not in total_available:
+                print('Invalid direction. Please try again.')
+            else:
+                is_valid_direction = True
+    print('Please enter the names of the preconditions you would like to attach to this block one at a time.')
+    print('If you are done adding preconditions, just hit Enter.')
+    print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values()]))
+    preconditions = []
+    is_preconditions_done = False
+    pre_name = ''
+    pre_id = -1
+    while not is_preconditions_done:
+        try:
+            pre_name = raw_input('>')
+        except:
+            pre_name = input('>')
+        if pre_name == 'ret':
+            return (False, 0)
+        elif pre_name == 'q':
+            return (False, 1)
+        else:
+            if len(pre_name) == 0:
+                # User hit Enter
+                is_preconditions_done = True
+                continue
+            # Check if precondition exists
+            pre_found = False
+            for (cond_id, pre) in maker.preconditions.items():
+                if pre.name.lower() == pre_name.lower():
+                    pre_id = cond_id
+                    pre_found = True
+                    break
+            if not pre_found:
+                print('No such precondition exists. Please try again.')
+                print('Please enter the names of the preconditions you would like to attach to this block one at a time.')
+                print('If you are done adding preconditions, just hit Enter.')
+                print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values() if pre.id not in preconditions]))
+            else:
+                # Check if this precondition was already added
+                if pre_id in preconditions:
+                    print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
+                    print('Please enter the names of the preconditions you would like to attach to this block one at a time.')
+                    print('If you are done adding preconditions, just hit Enter.')
+                    print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                else:
+                    preconditions.append(pre_id)
+                    print('Precondition added successfully!')
+                    print('Please enter the names of the preconditions you would like to attach to this block one at a time.')
+                    print('If you are done adding preconditions, just hit Enter.')
+                    print('Available preconditions: ' + str([pre.name for pre in maker.preconditions.values() if pre.id not in preconditions]))
+    return (True, loc_id, direction, preconditions)
+
+def valid_action(maker):
+    print('Would you like to add an action to an item or a NPC character?')
+    print('\ta) Item')
+    print('\tb) NPC')
+    subject = ''
+    is_valid_subject = False
+    while not is_valid_subject:
+        try:
+            subject = raw_input('>')
+        except:
+            subject = input('>')
+        if subject == 'ret':
+            return (False, 0)
+        elif subject == 'q':
+            return (False, 1)
+        else:
+            if len(subject) == 1 and subject in 'ab':
+                is_valid_subject = True
+            else:
+                print('Invalid option! Please try again.')
+    if subject == 'a':
+        print('Please enter the item name:')
+        print('Available items: ' + str([item.name for item in maker.items.values()]))
+        subject = 0
+    elif subject == 'b':
+        print('Please enter the NPC name:')
+        print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
+        subject = 1
+    subject_name = ''
+    subject_id = -1
+    is_subject_name_valid = False
+    while not is_subject_name_valid:
+        try:
+            subject_name = raw_input('>')
+        except:
+            subject_name = input('>')
+        if subject_name == 'ret':
+            return (False, 0)
+        elif subject_name == 'q':
+            return (False, 1)
+        else:
+            if subject == 0:
+                # Item: check if item exists
+                item_exists = False
+                for (item_id, item) in maker.items.items():
+                    if item.name.lower() == subject_name.lower():
+                        item_exists = True
+                        subject_id = item.id
+                        break
+                if not item_exists:
+                    print('No such item exists. Please try again.')
+                    continue
+                else:
+                    is_subject_name_valid = True
+            elif subject == 1:
+                # NPC: check if NPC exists
+                npc_exists = False
+                for (npc_id, npc) in maker.characters.items():
+                    if npc.name.lower() == subject_name.lower():
+                        npc_exists = True
+                        subject_id = npc.id
+                        break
+                if not npc_exists:
+                    print('There is no NPC with this name. Please try again.')
+                    continue
+                else:
+                    is_subject_name_valid = True
+            else:
+                print('Bug here')
+                return (False, 0)
+    print('Please enter the corresponding letter for an action from the menu below:')
+    print('Actions:')
+    print('\ta) Describe something')
+    print('\tb) Call NPC to Location')
+    print('\tc) Interact with Person')
+    print('\td) Ask for Item')
+    print('\te) Redeem Item')
+    action = ''
+    is_valid_action = False
+    while not is_valid_action:
+        try:
+            action = raw_input('>')
+        except:
+            action = input('>')
+        if action == 'ret':
+            return (False, 0)
+        elif action == 'q':
+            return (False, 1)
+        else:
+            if len(action) == 1 and action in 'abcde':
+                is_valid_action = True
+            else:
+                print('Invalid action! Please try again.')
+    # Get command name
+    print('What would you like to name this action command?')
+    command_name = ''
+    is_command_name_valid = False
+    while not is_command_name_valid:
+        try:
+            command_name = raw_input('>')
+        except:
+            command_name = input('>')
+        if command_name == 'ret':
+            return (False, 0)
+        elif command_name == 'q':
+            return (False, 1)
+        else:
+            # Check if the name contains at least one ascii characher
+            ascii_found = False
+            for c in command_name:
+                if c.lower() in string.ascii_lowercase:
+                    ascii_found = True
+                    break
+            if not ascii_found:
+                print('The command name must contain at least 1 ASCII character. Please try again.')
+                continue
+            else:
+                is_command_name_valid = True
+    # Get the arguments
+    if action == 'a':
+        # Describe something
+        print('Please write a description to print when this command is called:')
+        description = ''
+        try:
+            description = raw_input('>')
+        except:
+            description = input('>')
+        if description == 'ret':
+            return (False, 0)
+        elif description == 'q':
+            return (False, 1)
+        return (True, subject, subject_id, command_name, 'describe something', description)
+    elif action == 'b':
+        # Call NPC to Location
+        pass
+    elif action == 'c':
+        # Interact with Person
+        pass
+    elif action == 'd':
+        # Ask for Item
+        pass
+    elif action == 'e':
+        # Redeem Item
+        pass
+    else:
+        return (False, 0)
+
 
 class GameMaker(object):
 
@@ -1247,6 +1499,7 @@ class GameMaker(object):
         self.relationships = []
         self.inventory = []
         self.adjacencies = []
+        self.actions = []
 
     def create_game(self):
         pass
@@ -1382,7 +1635,14 @@ while True:
             game_maker.adjacencies.append((result[1], result[2], result[3]))
             print('Adjacency added successfully!')
     elif entered.lower() == 'j':
-        print('This option is not implemented yet.')
+        result = valid_block(game_maker)
+        if not result[0]:
+            if result[1] == 1:
+                print('Goodbye')
+                break
+        else:
+            game_maker.blocks.append((result[1], result[2], result[3]))
+            print('Block added successfully!')
     elif entered.lower() == 'k':
         print('This option is not implemented yet.')
     elif entered.lower() == 'l':
@@ -1392,10 +1652,10 @@ while True:
         # Check added components
         # PUT THIS ALL IN ANOTHER FUNCTION
         print('Locations: ' + str([loc.name for loc in game_maker.locations.values()]))
-        print('Connections: ')
         print('NPCs: ' + str([n.name for n in game_maker.characters.values()]))
         print('Items: ' + str([item.name for item in game_maker.items.values()]))
         print('Plot points: ' + str([plot.name for plot in game_maker.plot_points.values()]))
+        print('Preconditions: ' + str([pre.name for pre in game_maker.preconditions.values()]))
     elif entered.lower() == 'n':
         print('This option is not implemented yet.')
     else:
