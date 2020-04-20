@@ -4,11 +4,12 @@ precondition_id = 0 # unique precondition id, assigned by creation order
 
 class Precondition(object):
     
-    def __init__(self, condition_context, elems):
+    def __init__(self, condition_context, elems, name=""):
         global precondition_id
         self.context = condition_context
         self.elems = elems
         self.id = precondition_id
+        self.name = name
         precondition_id += 1
 
     def __eq__(self, other):
