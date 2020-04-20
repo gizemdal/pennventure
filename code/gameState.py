@@ -88,8 +88,12 @@ class GameState(object):
         self.current_location = player.curr_location
         self.npcs = npc_dict
         self.locations = location_dict
-        self.plot = plot
-        self.current_plot_point = self.plot.start
+        if plot:
+            self.plot = plot
+            self.current_plot_point = self.plot.start
+        else:
+            self.plot = None
+            self.current_plot_point = None
 
     def is_condition_satisfied(self, condition):
         # Condition = Precondition(context = condition text, elems = condition element(s))

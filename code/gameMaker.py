@@ -38,7 +38,7 @@ def print_preconditions(maker, preconditions):
     print('Available preconditions: ')
     list_of_conditions = [(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]
     for condition in list_of_conditions:
-        print('\tName: ' + str(condition[1]) + ' , Context: ' + str(condition[2]))
+        print('\tName: ' + str(condition[1]) + ' , Context: ' + str(condition[0]))
 
 def valid_location(maker):
     # First get a valid location name
@@ -2177,7 +2177,7 @@ class GameMaker(object):
         print('Which starting location do you want the player to start from?')
         print('Available locations: ' + str([loc.name for loc in self.locations.values()]))
         loc_name = ''
-        loc_id = -1
+        player_loc = 0
         is_valid_location = False
         while not is_valid_location:
             try:
@@ -2193,7 +2193,7 @@ class GameMaker(object):
                 loc_found = False
                 for loc in self.locations.values():
                     if loc.name.lower() == loc_name.lower():
-                        loc_id = loc.id
+                        player_loc = loc.id
                         loc_found = True
                         break
                 if not loc_found:
@@ -2222,9 +2222,11 @@ class GameMaker(object):
                 loc_id = item.location.id
             f.write('item/' + str(item.name) + '/' + str(item.description) + '/' + str(is_gettable) + '/' + str(item.examine) + '/' + str(loc_id) + '\n')
         # Write the player
-        f.write('player/' + str(self.player.name) + '/' + str(loc_id) + '\n')
+        f.write('player/' + str(self.player.name) + '/' + str(player_loc) + '\n')
         # Write the npcs
         for (npc_id, npc) in self.characters.items():
+            if npc.id == 0:
+                continue
             npc_loc = -1
             if npc.curr_location:
                 npc_loc = npc.curr_location.id

@@ -110,26 +110,27 @@ class DramaManager(object):
                 if not command_found:
                     print("I'm not sure what you want to do...")
 
-        # Check if player made actions to move to next plot point
-        # Conditions for plot points should be added such that no two plot points would be available at the same time
-        for adj in self.game_state.plot.adjacency_list[self.game_state.current_plot_point.id]:
-            all_conditions_satisfied = True
-            for condition in adj[1]:
-                result = self.game_state.is_condition_satisfied(condition)[0]
-                if not result:
-                    #print(condition)
-                    all_conditions_satisfied = False
+        if self.game_state.plot:
+            # Check if player made actions to move to next plot point
+            # Conditions for plot points should be added such that no two plot points would be available at the same time
+            for adj in self.game_state.plot.adjacency_list[self.game_state.current_plot_point.id]:
+                all_conditions_satisfied = True
+                for condition in adj[1]:
+                    result = self.game_state.is_condition_satisfied(condition)[0]
+                    if not result:
+                        #print(condition)
+                        all_conditions_satisfied = False
+                        break
+                if all_conditions_satisfied:
+                    self.game_state.current_plot_point = self.game_state.plot.plot_points[adj[0]]
+                    if len(self.game_state.current_plot_point.message) > 0:
+                        print(self.game_state.current_plot_point.message)
+                    if self.game_state.current_plot_point.is_end:
+                        game_end = True
                     break
-            if all_conditions_satisfied:
-                self.game_state.current_plot_point = self.game_state.plot.plot_points[adj[0]]
-                if len(self.game_state.current_plot_point.message) > 0:
-                    print(self.game_state.current_plot_point.message)
-                if self.game_state.current_plot_point.is_end:
-                    game_end = True
-                break
 
-        # Make changes to the game if necessary
-        self.make_changes(self.game_state.current_plot_point.changes)
+            # Make changes to the game if necessary
+            self.make_changes(self.game_state.current_plot_point.changes)
         return game_end
     
     def make_changes(self, change_list):

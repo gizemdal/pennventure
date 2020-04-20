@@ -199,12 +199,13 @@ class Game(object):
                         action_repeated = tokens[8]
                         conditions = []
                         # extract preconditions
-                        split_conditions = tokens[9].split('-')
-                        for condition in split_conditions:
-                            if condition[-1] == '\n':
-                                conditions.append(preconditions[int(condition[:-1])])
-                            else:
-                                conditions.append(preconditions[int(condition)])
+                        if len(tokens) > 9:
+                            split_conditions = tokens[9].split('-')
+                            for condition in split_conditions:
+                                if condition[-1] == '\n':
+                                    conditions.append(preconditions[int(condition[:-1])])
+                                else:
+                                    conditions.append(preconditions[int(condition)])
                         subject.add_action(action_name, call_to_location, (action_loc, action_npc, action_desc, action_repeated), preconditions=conditions)
                     elif tokens[4] == 'interaction with person':
                         person_one = None
@@ -222,12 +223,13 @@ class Game(object):
                         action_desc = tokens[8]
                         conditions = []
                         # extract preconditions
-                        split_conditions = tokens[9].split('-')
-                        for condition in split_conditions:
-                            if condition[-1] == '\n':
-                                conditions.append(preconditions[int(condition[:-1])])
-                            else:
-                                conditions.append(preconditions[int(condition)])
+                        if len(tokens) > 9:
+                            split_conditions = tokens[9].split('-')
+                            for condition in split_conditions:
+                                if condition[-1] == '\n':
+                                    conditions.append(preconditions[int(condition[:-1])])
+                                else:
+                                    conditions.append(preconditions[int(condition)])
                         subject.add_action(action_name, interaction_with_person, (person_one, person_two, interaction_score, action_desc), preconditions=conditions)
                     elif tokens[4] == 'ask for item':
                         person_one = None
@@ -246,12 +248,13 @@ class Game(object):
                         action_repeated = tokens[9]
                         conditions = []
                         # extract preconditions
-                        split_conditions = tokens[10].split('-')
-                        for condition in split_conditions:
-                            if condition[-1] == '\n':
-                                conditions.append(preconditions[int(condition[:-1])])
-                            else:
-                                conditions.append(preconditions[int(condition)])
+                        if len(tokens) > 10:
+                            split_conditions = tokens[10].split('-')
+                            for condition in split_conditions:
+                                if condition[-1] == '\n':
+                                    conditions.append(preconditions[int(condition[:-1])])
+                                else:
+                                    conditions.append(preconditions[int(condition)])
                         subject.add_action(action_name, ask_for_item, (person_one, person_two, action_item, action_desc, action_repeated), preconditions=conditions)
                     elif tokens[4] == 'redeem item':
                         person = None
@@ -264,12 +267,13 @@ class Game(object):
                         action_desc = tokens[8]
                         conditions = []
                         # extract preconditions
-                        split_conditions = tokens[9].split('-')
-                        for condition in split_conditions:
-                            if condition[-1] == '\n':
-                                conditions.append(preconditions[int(condition[:-1])])
-                            else:
-                                conditions.append(preconditions[int(condition)])
+                        if len(tokens) > 9:
+                            split_conditions = tokens[9].split('-')
+                            for condition in split_conditions:
+                                if condition[-1] == '\n':
+                                    conditions.append(preconditions[int(condition[:-1])])
+                                else:
+                                    conditions.append(preconditions[int(condition)])
                         subject.add_action(action_name, redeem_item, (person, buy_item, use_item, action_desc), preconditions=conditions)
             # Now create the game state
             game_state = GameState(player, plot, npc_dict=npcs, location_dict=locations)
@@ -354,18 +358,16 @@ class Game(object):
         phone.add_action('call Anna', call_to_location, (hallway, anna, "You call Anna and ask if she would be down to meet up with you.\n" +\
                                                                          "'Of course! I will be in your hallway in a bit.' she responds.",
                                                                          "You already called Anna."), preconditions=[can_call_anna])
-        anna.add_action('friendly interaction', interaction_with_person, (player, anna, 20, "You compliment Anna's dress and tell a funny joke.\n" +\
-                                                                                            "'Omg you're so funny!' she cries."),
+        anna.add_action('friendly interaction', interaction_with_person, (player, anna, 20, "You compliment Anna's dress and tell a funny joke.\n"),
                                                                                             preconditions=[called_anna])
         anna.add_action('rude interaction', interaction_with_person, (player, anna, -999, "You make fun of Anna's dress and make-up.\n" +\
-                                                                                         "'You're such a prick! Ugh, I don't want to talk to you!' She yells and storms off the building."),
+                                                                                         "She yells at you and storms off the building."),
                                                                                          preconditions=[called_anna])
         anna.add_action('ask for money', ask_for_item, (player, anna, money, "You tell Anna that you need some money. She hands you 5 bucks.", "You already did this action."), 
                                                                                          preconditions=[friendly_to_anna, called_anna, anna_have_money])
-        brian.add_action('get to know Brian', interaction_with_person, (player, brian, 50, "It turns out that you guys love pretty much the same stuff. He's like your brother from another mother!\n" +\
-                                                                                           "Okay, that's a bit of exaggeration, but still he would help you with anything!"),
+        brian.add_action('get to know Brian', interaction_with_person, (player, brian, 50, "It turns out that you guys love pretty much the same stuff. You get along really well!\n"),
                                                                                         preconditions=[brian_around])
-        brian.add_action('ask for money', ask_for_item, (player, brian, money, "You tell Brian that you're craving snacks. Before you even ask for money, he hands you 5 bucks. What a lad!", "You already did this action."), 
+        brian.add_action('ask for money', ask_for_item, (player, brian, money, "You tell Brian that you're craving snacks. Before you even ask for money, he hands you 5 bucks.", "You already did this action."), 
                                                                                          preconditions=[talk_to_brian, brian_around, brian_have_money])
         vending_machine.add_action('buy a snack', redeem_item, (player, snack, money, "You buy a delicious snack from the vending machine."), preconditions=[have_money])
 
