@@ -1,1 +1,8 @@
 loc/Bedroom/You're standing in your small and cozy dorm bedroom./1
+loc/Hallway/You're standing in the middle of the hallway in front of your door.\n There is a vending machine accross./0
+con/0/1/out
+item/cell phone/iphone/1/iphone/0
+item/vending machine/just a machine/0/snacks are good/1
+item/snack/snack/0/cool/1
+item/money/money/1/5 dollars/-1
+item/key/key/1/door key/0

@@ -34,6 +34,12 @@ def menu_options():
     print('\tm) Check Added Components')
     print('\tn) Delete Component')
 
+def print_preconditions(maker, preconditions):
+    print('Available preconditions: ')
+    list_of_conditions = [(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]
+    for condition in list_of_conditions:
+        print('\tName: ' + str(condition[1]) + ' , Context: ' + str(condition[2]))
+
 def valid_location(maker):
     # First get a valid location name
     print('Please enter the name of your location:')
@@ -1156,7 +1162,7 @@ def valid_plot_point(maker):
                         if not info_2[0]:
                             return info_2
                         else:
-                            changes.append(('bring_npc_to', info_2[1], info_2[2]))
+                            changes.append(('bring_npc_to', info[1], info_2[1]))
                             print('Bring NPC to location change added!')
                             print('Please pick one of the categories below. If you are done adding changes or do not want to add any at all, just hit Enter.')
                             print('\ta) Set NPC location to None')
@@ -1168,7 +1174,7 @@ def valid_plot_point(maker):
 
 def valid_adjacency(maker):
     print('Please enter the name of the FROM plot point:')
-    print('Available plot points: ' + str([plot.name for plot in game_maker.plot_points.values()]))
+    print('Available plot points: ' + str([plot.name for plot in maker.plot_points.values()]))
     from_plot = ''
     from_plot_id = -1
     is_from_plot_valid = False
@@ -1194,7 +1200,7 @@ def valid_adjacency(maker):
             else:
                 is_from_plot_valid = True
     print('Please enter the name of the TO plot point:')
-    print('Available plot points: ' + str([plot.name for plot in game_maker.plot_points.values() if plot.name.lower() != from_plot.lower()]))
+    print('Available plot points: ' + str([plot.name for plot in maker.plot_points.values() if plot.name.lower() != from_plot.lower()]))
     to_plot = ''
     to_plot_id = -1
     is_to_plot_valid = False
@@ -1225,7 +1231,7 @@ def valid_adjacency(maker):
                 is_to_plot_valid = True
     print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
     print('If you are done adding preconditions, just hit Enter.')
-    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values()]))
+    print_preconditions(maker, [])
     preconditions = []
     is_preconditions_done = False
     pre_name = ''
@@ -1255,20 +1261,20 @@ def valid_adjacency(maker):
                 print('No such precondition exists. Please try again.')
                 print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
                 print('If you are done adding preconditions, just hit Enter.')
-                print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                print_preconditions(maker, preconditions)
             else:
                 # Check if this precondition was already added
                 if pre_id in preconditions:
                     print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
                     print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
-                    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                    print_preconditions(maker, preconditions)
                 else:
                     preconditions.append(pre_id)
                     print('Precondition added successfully!')
                     print('Please enter the name of the preconditions you would like to attach to this graph edge one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
-                    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                    print_preconditions(maker, preconditions)
     return (True, from_plot_id, to_plot_id, preconditions)
 
 def valid_block(maker):
@@ -1325,7 +1331,7 @@ def valid_block(maker):
                 is_valid_direction = True
     print('Please enter the names of the preconditions you would like to attach to this block one at a time.')
     print('If you are done adding preconditions, just hit Enter.')
-    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values()]))
+    print_preconditions(maker, [])
     preconditions = []
     is_preconditions_done = False
     pre_name = ''
@@ -1355,20 +1361,20 @@ def valid_block(maker):
                 print('No such precondition exists. Please try again.')
                 print('Please enter the names of the preconditions you would like to attach to this block one at a time.')
                 print('If you are done adding preconditions, just hit Enter.')
-                print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                print_preconditions(maker, preconditions)
             else:
                 # Check if this precondition was already added
                 if pre_id in preconditions:
                     print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
                     print('Please enter the names of the preconditions you would like to attach to this block one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
-                    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                    print_preconditions(maker, preconditions)
                 else:
                     preconditions.append(pre_id)
                     print('Precondition added successfully!')
                     print('Please enter the names of the preconditions you would like to attach to this block one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
-                    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                    print_preconditions(maker, preconditions)
     return (True, loc_id, direction, preconditions)
 
 def valid_action(maker):
@@ -1593,7 +1599,7 @@ def valid_action(maker):
         # Get the preconditions
         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
         print('If you are done adding preconditions, just hit Enter.')
-        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values()]))
+        print_preconditions(maker, [])
         preconditions = []
         is_preconditions_done = False
         pre_name = ''
@@ -1623,20 +1629,20 @@ def valid_action(maker):
                     print('No such precondition exists. Please try again.')
                     print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
-                    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                    print_preconditions(maker, preconditions)
                 else:
                     # Check if this precondition was already added
                     if pre_id in preconditions:
                         print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
                         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                         print('If you are done adding preconditions, just hit Enter.')
-                        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                        print_preconditions(maker, preconditions)
                     else:
                         preconditions.append(pre_id)
                         print('Precondition added successfully!')
                         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                         print('If you are done adding preconditions, just hit Enter.')
-                        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                        print_preconditions(maker, preconditions)
         return (True, subject, subject_id, command_name, 'call to location', loc_id, npc_id, description, repeated, preconditions)
     elif action == 'c':
         print('Please enter the name of your character.') 
@@ -1770,7 +1776,7 @@ def valid_action(maker):
         # Get the preconditions
         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
         print('If you are done adding preconditions, just hit Enter.')
-        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values()]))
+        print_preconditions(maker, [])
         preconditions = []
         is_preconditions_done = False
         pre_name = ''
@@ -1800,20 +1806,20 @@ def valid_action(maker):
                     print('No such precondition exists. Please try again.')
                     print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
-                    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                    print_preconditions(maker, preconditions)
                 else:
                     # Check if this precondition was already added
                     if pre_id in preconditions:
                         print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
                         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                         print('If you are done adding preconditions, just hit Enter.')
-                        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                        print_preconditions(maker, preconditions)
                     else:
                         preconditions.append(pre_id)
                         print('Precondition added successfully!')
                         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                         print('If you are done adding preconditions, just hit Enter.')
-                        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                        print_preconditions(maker, preconditions)
         return (True, subject, subject_id, command_name, 'interaction with person', char_id_1, char_id_2, short_term, description, preconditions)
     elif action == 'd':
         # Ask for Item
@@ -1944,7 +1950,7 @@ def valid_action(maker):
         # Get the preconditions
         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
         print('If you are done adding preconditions, just hit Enter.')
-        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values()]))
+        print_preconditions(maker, [])
         preconditions = []
         is_preconditions_done = False
         pre_name = ''
@@ -1974,20 +1980,20 @@ def valid_action(maker):
                     print('No such precondition exists. Please try again.')
                     print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
-                    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                    print_preconditions(maker, preconditions)
                 else:
                     # Check if this precondition was already added
                     if pre_id in preconditions:
                         print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
                         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                         print('If you are done adding preconditions, just hit Enter.')
-                        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                        print_preconditions(maker, preconditions)
                     else:
                         preconditions.append(pre_id)
                         print('Precondition added successfully!')
                         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                         print('If you are done adding preconditions, just hit Enter.')
-                        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                        print_preconditions(maker, preconditions)
         return (True, subject, subject_id, command_name, 'ask for item', char_id_1, char_id_2, item_id, description, repeated, preconditions)
     elif action == 'e':
         # Redeem Item
@@ -2098,7 +2104,7 @@ def valid_action(maker):
         # Get the preconditions
         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
         print('If you are done adding preconditions, just hit Enter.')
-        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values()]))
+        print_preconditions(maker, [])
         preconditions = []
         is_preconditions_done = False
         pre_name = ''
@@ -2128,20 +2134,20 @@ def valid_action(maker):
                     print('No such precondition exists. Please try again.')
                     print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                     print('If you are done adding preconditions, just hit Enter.')
-                    print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                    print_preconditions(maker, preconditions)
                 else:
                     # Check if this precondition was already added
                     if pre_id in preconditions:
                         print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
                         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                         print('If you are done adding preconditions, just hit Enter.')
-                        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                        print_preconditions(maker, preconditions)
                     else:
                         preconditions.append(pre_id)
                         print('Precondition added successfully!')
                         print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
                         print('If you are done adding preconditions, just hit Enter.')
-                        print('Available preconditions: ' + str([(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]))
+                        print_preconditions(maker, preconditions)
         return (True, subject, subject_id, command_name, 'redeem item', char_id_1, buy_id, use_id, description, preconditions)
     else:
         return (False, 0)
@@ -2216,7 +2222,7 @@ class GameMaker(object):
                 loc_id = item.location.id
             f.write('item/' + str(item.name) + '/' + str(item.description) + '/' + str(is_gettable) + '/' + str(item.examine) + '/' + str(loc_id) + '\n')
         # Write the player
-        f.write('player/' + str(self.player.name) + '/' + str(self.player.curr_location.id) + '\n')
+        f.write('player/' + str(self.player.name) + '/' + str(loc_id) + '\n')
         # Write the npcs
         for (npc_id, npc) in self.characters.items():
             npc_loc = -1
@@ -2252,6 +2258,14 @@ class GameMaker(object):
                 f.write('pre/player_in_location/' + str(pre.elems[0]) + '\n')
             elif context == 'npc_in_location':
                 f.write('pre/npc_in_location/' + str(pre.elems[0]) + '/' + str(pre.elems[1]) + '\n')
+        # Write the blocks
+        for block in self.blocks:
+            txt = 'block/' + str(block[0]) + '/' + str(block[1]) + '/'
+            for pre in block[2]:
+                txt = txt + str(pre) + '-'
+            txt = txt[:-1]
+            txt += '\n'
+            f.write(txt)
         # Write the plot points
         for (plot_id, plot) in self.plot_points:
             is_end = 0
@@ -2412,7 +2426,6 @@ while True:
             elems = result[3:]
             new_precondition = Precondition(result_category, elems, result[1])
             game_maker.preconditions[new_precondition.id] = new_precondition
-            print(elems)
             print('Precondition added successfully!')
     elif entered.lower() == 'h':
         result = valid_plot_point(game_maker)
