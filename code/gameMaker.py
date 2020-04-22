@@ -2439,7 +2439,63 @@ def valid_delete(maker):
         del maker.characters[char_id]
         return (True)
     elif to_delete == 'c':
-        pass
+        # Delete connection
+        print("Enter the names of the two locations between which the connection to delete exists. Separate the names by ','")
+        print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
+        loc_1_id = -1
+        loc_2_id = -1
+        entered_locs = ''
+        is_valid_locs = False
+        while not is_valid_locs:
+            try:
+                entered_locs = raw_input('>')
+            except:
+                entered_locs = input('>')
+            if entered_locs == 'ret':
+                return (False, 0)
+            elif entered_locs == 'q':
+                return (False, 1)
+            else:
+                splitted = entered_locs.split(',')
+                if len(splitted) != 2:
+                    print('Invalid format. Please re-enter the 2 location names by comma separation.')
+                    continue
+                # Check if locations exist
+                loc_found = False
+                for loc in maker.locations.values():
+                    if loc.name.lower() == splitted[0].lower():
+                        loc_1_id = loc.id
+                        loc_found = True
+                        break
+                if not loc_found:
+                    print(splitted[0] + ' does not exist. Please try again.')
+                    continue
+                loc_found = False
+                for loc in maker.locations.values():
+                    if loc.name.lower() == splitted[1].lower():
+                        loc_2_id = loc.id
+                        loc_found = True
+                        break
+                if not loc_found:
+                    print(splitted[1] + ' does not exist. Please try again.')
+                    continue
+                is_valid_locs = True
+        # Check if a connection exists between these locations
+        connect_found = False
+        direction = ''
+        idx = 0
+        for con in maker.connections:
+            if con[0] == loc_1_id and con[1] == loc_2_id:
+                connect_found = True
+                direction = con[2]
+                break
+            idx += 1
+        if not connect_found:
+            print('There is no connection between given locations. Please try again with a different entry.')
+            return (False, 0)
+        print('Connections along directions ' + direction + ' and ' + direction_opp(direction) + ' between ' + maker.locations[loc_1_id].name + ' and ' + maker.locations[loc_2_id].name + ' are removed successfully!')
+        maker.connections.pop(idx)
+        return (True)
     elif to_delete == 'd':
         pass
     elif to_delete == 'e':
