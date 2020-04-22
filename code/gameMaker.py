@@ -339,7 +339,9 @@ def valid_relationship(maker):
                 else:
                     is_char_2_valid = True
     # Now get the scores
-    print('Please enter the short term relationship score (must be an integer):')
+    print('Please enter the short term relationship score (must be an integer).')
+    print('The short term relationship score represents the relationship status of two characters in a given moment.')
+    print('A short term relationship score greater than or equal to 50 is considered as friendship while much lower scores may result in dislike status.')
     short_term = ''
     is_short_term_valid = False
     while not is_short_term_valid:
@@ -381,6 +383,8 @@ def valid_relationship(maker):
                 short_term = -short_term
             is_short_term_valid = True
     print('Please enter the long term relationship score (must be an integer):')
+    print('The long term relationship score represents the relationship status of two characters in the long run.')
+    print('A long term relationship score greater than or equal to 50 is considered as strong friendship while much lower scores may result in strong dislike status.')
     long_term = ''
     is_long_term_valid = False
     while not is_long_term_valid:
@@ -1722,6 +1726,7 @@ def valid_action(maker):
                         is_char_2_valid = True
         # Now get the scores
         print('Please enter a relationship score for this interaction (must be an integer):')
+        print('(This score will alter the short term relationship between two characters)')
         short_term = ''
         is_short_term_valid = False
         while not is_short_term_valid:
