@@ -2157,6 +2157,194 @@ def valid_action(maker):
     else:
         return (False, 0)
 
+def valid_delete(maker):
+    # Not everything can be deleted, item to be deleted must not have any dependents
+    to_delete = ''
+    # Print all possibilities
+    print('What component would you like to delete?')
+    print('(Note: Keep in mind that deleting the starting plot point is not allowed once it is added)')
+    print('\ta) Location')
+    print('\tb) NPC')
+    print('\tc) Location connection')
+    print('\td) Relationship')
+    print('\te) Item')
+    print('\tf) Item from an inventory')
+    print('\tg) Precondition')
+    print('\th) Plot Point')
+    print('\ti) Plot Point Adjacency')
+    print('\tj) Block (between locations)')
+    print('\tk) Action')
+    is_context_valid = False
+    while not is_context_valid:
+        try:
+            to_delete = raw_input('>')
+        except:
+            to_delete = input('>')
+        if to_delete == 'ret':
+            return (False, 0)
+        elif to_delete == 'q':
+            return (False, 1)
+        else:
+            if len(to_delete) == 1 and to_delete in 'abcdefghijk':
+                is_context_valid = True
+            else:
+                print('Invalid component! Try again.')
+    if to_delete == 'a':
+        # Location
+        # Get the location
+        print('Please enter the name of the location to be deleted:')
+        print('Available locations: ' + str([loc.name for loc in maker.locations.values()]))
+        loc_name = ''
+        loc_id = -1
+        is_valid_location_name = False
+        while not is_valid_location_name:
+            try:
+                loc_name = raw_input('>')
+            except:
+                loc_name = input('>')
+            if loc_name == 'ret':
+                return (False, 0)
+            elif loc_name == 'q':
+                return (False, 1)
+            else:
+                # Check if such location exists
+                loc_found = False
+                for loc in maker.locations.values():
+                    if loc.name.lower() == loc_name.lower():
+                        loc_id = loc.id
+                        loc_found = True
+                        break
+                if not loc_found:
+                    print('No such location exists. Please try again.')
+                    continue
+                else:
+                    is_valid_location_name = True
+        # Must check if this location has dependents such as item, npc, precondition, plot point, block, connection, action
+        # Check if any item is dependent
+        dependency_found = False
+        item_found = ''
+        for (item_id, item) in maker.items.items():
+            if item.location:
+                if item.location.id == loc_id:
+                    dependency_found = True
+                    item_found = item.name
+                    break
+        if dependency_found:
+            print('You have ' + item_found +  ' in this location. You cannot delete ' + loc_name + ' until this item is removed.')
+            return (False, 0)
+        # Check if any npc is dependent
+        npc_found = ''
+        for (npc_id, npc) in maker.characters.items():
+            if npc.id == 0:
+                continue
+            if npc.curr_location:
+                if npc.curr_location.id == loc_id:
+                    dependency_found = True
+                    npc_found = npc.name
+                    break
+        if dependency_found:
+            print(npc_found + ' is in this location. You cannot delete ' + loc_name + ' until this NPC is removed.')
+            return (False, 0)
+        # Check if any precondition is dependent
+        pre_found = ''
+        for (pre_id, pre) in maker.preconditions.items():
+            for e in pre.elems:
+                if type(e) is Location:
+                    if e.id == loc_id:
+                        dependency_found = True
+                        pre_found = pre.name
+                        break
+        if dependency_found:
+            print('You have a precondition ' + pre_found + ' that contains this location. You cannot delete ' + loc_name + ' until this precondition is removed.')
+            return (False, 0)
+        # Check if any connection is dependent
+        con_loc = ''
+        for con in maker.connections:
+            if con[0] == loc_id:
+                dependency_found = True
+                con_loc = maker.locations[con[1]].name
+                break
+            elif con[1] == loc_id:
+                dependency_found = True
+                con_loc = maker.locations[con[0]].name
+                break
+        if dependency_found:
+            print('You have a connection with ' + con_loc + ' from this location. You cannot delete ' + loc_name + ' until this connection is removed.')
+            return (False, 0)
+        # Check if any block is dependent
+        block_dir = ''
+        for block in maker.blocks:
+            if block[0] == loc_id:
+                dependency_found = True
+                block_dir = block[1]
+                break
+            else:
+                # Check if any connection with this location in it exists
+                for con in maker.connections:
+                    if con[0] == loc_id and direction_opp(block[1]) == con[2]:
+                        dependency_found = True
+                        block_dir = direction_opp(block[1])
+                        break
+                    elif con[1] == loc_id and direction_opp(block[1]) == con[2]:
+                        dependency_found = True
+                        block_dir = direction_opp(block[1])
+                        break
+                if dependency_found:
+                    break
+        if dependency_found:
+            print('You have a block in the ' + block_dir + ' direction from this location. You cannot delete ' + loc_name + ' until this block is removed.')
+            return (False, 0)
+        # Check if any plot point is dependent
+        plot_point = ''
+        for (plot_id, plot) in maker.plot_points.items():
+            for change in plot.changes:
+                if change[0] == 'bring_npc_to':
+                    if change[2] == loc_id:
+                        dependency_found = True
+                        plot_point = plot.name
+                        break
+            if dependency_found:
+                break
+        if dependency_found:
+            print('You have a plot point ' + plot_point + ' with at least 1 bring_npc_to change dependent on this location. You cannot delete ' + loc_name + ' until this plot point is removed.')
+            return (False, 0)
+        # Check if any action is dependent
+        action_name = ''
+        for action in maker.actions:
+            if action[3] == 'call to location':
+                if action[4] == loc_id:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+        if dependency_found:
+            print('You have an action ' + action_name + " of category 'call to location' dependent on this location. You cannot delete " + loc_name + ' until this plot point is removed.')
+            return (False, 0)
+        # At this point there are no dependents left
+        print('Location ' + maker.locations[loc_id].name + ' is deleted successfully!')
+        del maker.locations[loc_id]
+        return (True)
+    elif to_delete == 'b':
+        pass
+    elif to_delete == 'c':
+        pass
+    elif to_delete == 'd':
+        pass
+    elif to_delete == 'e':
+        pass
+    elif to_delete == 'f':
+        pass
+    elif to_delete == 'g':
+        pass
+    elif to_delete == 'h':
+        pass
+    elif to_delete == 'i':
+        pass
+    elif to_delete == 'j':
+        pass
+    elif to_delete == 'k':
+        pass
+    else:
+        return (False, 0)
 
 class GameMaker(object):
 
@@ -2484,6 +2672,10 @@ while True:
         print('Plot points: ' + str([plot.name for plot in game_maker.plot_points.values()]))
         print('Preconditions: ' + str([(pre.context, pre.name) for pre in game_maker.preconditions.values()]))
     elif entered.lower() == 'n':
-        print('This option is not implemented yet.')
+        result = valid_delete(game_maker)
+        if not result[0]:
+            if result[1] == 1:
+                print('Goodbye')
+                break
     else:
         print('Cannot process your request. Please pick an option from the menu.')
