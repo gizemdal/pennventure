@@ -2324,7 +2324,120 @@ def valid_delete(maker):
         del maker.locations[loc_id]
         return (True)
     elif to_delete == 'b':
-        pass
+        # Get the NPC
+        print('Please enter the name of your character.')
+        print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
+        char_name = ''
+        char_id = 0
+        is_char_valid = False
+        while not is_char_valid:
+            try:
+                char_name = raw_input('>')
+            except:
+                char_name = input('>')
+            if char_name == 'ret':
+                return (False, 0)
+            elif char_name == 'q':
+                return (False, 1)
+            else:
+                if len(char_name) == 0 or char_name.lower() == 'player':
+                    print('You cannot delete the player.')
+                    continue
+                # Check if character exists
+                char_found = False
+                for char in maker.characters.values():
+                    if char.id == 0:
+                        continue
+                    if char.name.lower() == char_name.lower():
+                        char_id = char.id
+                        char_found = True
+                        break
+                if not char_found:
+                    print('You do not have a character with this name. Please try again.')
+                    continue
+                else:
+                    is_char_valid = True
+        # Possible dependencies: relationship, inventory, precondition, plot point, action
+        dependency_found = False
+        rel_char = ''
+        # Check if a relationship is dependent
+        for relationship in maker.relationships:
+            if relationship[0] == char_id:
+                rel_char = maker.characters[relationship[1]].name
+                dependency_found = True
+                break
+            elif relationship[1] == char_id:
+                rel_char = maker.characters[relationship[1]].name
+                dependency_found = True
+                break
+        if dependency_found:
+            print('This character has a relationship with ' + rel_char + '. You cannot delete ' + char_name + ' until this relationship is removed.')
+            return (False, 0)
+        # Check if an inventory is dependent
+        item_name = ''
+        for i in maker.inventory:
+            if i[0] == char_id:
+                item_name = maker.items[i[1]]
+                dependency_found = True
+                break
+        if dependency_found:
+            print('The item ' + item_name + ' is in this character\'s inventory. You cannot delete ' + char_name + ' until this inventory change is removed.')
+            return (False, 0)
+        # Check if a precondition is dependent
+        pre_found = ''
+        for (pre_id, pre) in maker.preconditions.items():
+            for e in pre.elems:
+                if type(e) is NPC:
+                    if e.id == char_id:
+                        dependency_found = True
+                        pre_found = pre.name
+                        break
+        if dependency_found:
+            print('You have a precondition ' + pre_found + ' that contains this character. You cannot delete ' + char_name + ' until this precondition is removed.')
+            return (False, 0)
+        # Check if a plot point is dependent
+        plot_point = ''
+        for (plot_id, plot) in maker.plot_points.items():
+            for change in plot.changes:
+                if change[1] == char_id:
+                    dependency_found = True
+                    plot_point = plot.name
+                    break
+            if dependency_found:
+                break
+        if dependency_found:
+            print('You have a plot point ' + plot_point + ' with at least 1 change dependent on this location. You cannot delete ' + loc_name + ' until this plot point is removed.')
+            return (False, 0)
+        # Check if an action is dependent
+        action_name = ''
+        for action in maker.actions:
+            if action[0] == 1:
+                if action[1] == char_id:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            if action[3] == 'call to location':
+                if action[5] == char_id:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            elif action[3] == 'interaction with person':
+                if action[4] == char_id or action[5] == char_id:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            elif action[3] == 'ask for item':
+                if action[4] == char_id or action[5] == char_id:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+        if dependency_found:
+            print('You have an action ' + action_name + " of category 'call to location' dependent on this location. You cannot delete " + loc_name + ' until this plot point is removed.')
+            return (False, 0)
+        # At the point there are no dependents left
+        print('NPC ' + maker.characters[char_id].name + ' is deleted successfully!')
+        del maker.characters[char_id]
+        return (True)
     elif to_delete == 'c':
         pass
     elif to_delete == 'd':
