@@ -17,6 +17,15 @@ from functions import *
 import string
 from location import direction_opp
 
+def trim_space_punc(n):
+    # get rid of the white space and punctuation from given string
+    new_n = ''
+    for c in n:
+        if c in string.whitespace or c in string.punctuation:
+            continue
+        new_n += c
+    return new_n
+
 def menu_options():
     print('Options:')
     print('\ta) Add Location')
@@ -39,6 +48,22 @@ def print_preconditions(maker, preconditions):
     list_of_conditions = [(pre.context, pre.name) for pre in maker.preconditions.values() if pre.id not in preconditions]
     for condition in list_of_conditions:
         print('\tName: ' + str(condition[1]) + ' , Context: ' + str(condition[0]))
+
+def print_relationships(maker):
+    if len(maker.relationships) == 0:
+        print('No relationship is created yet.')
+    else:
+        print('\nRelationships: ')
+        for rel in maker.relationships:
+            print(str(maker.characters[rel[0]].name) + ' -> ' + str(maker.characters[rel[1]].name) + ', Short term: ' + str(rel[2]) + ', Long term: ' + str(rel[3]))
+
+def print_connections(maker):
+    if len(maker.connections) == 0:
+        print('No connection is created yet.')
+    else:
+        print('\nConnections: ')
+        for con in maker.connections:
+            print('Locations: ' + str(maker.locations[con[0]].name) + ' <-> ' + str(maker.locations[con[1]].name) + ', Direction: ' + str(con[2]) + '/' + str(direction_opp(con[2])))
 
 def valid_location(maker):
     # First get a valid location name
@@ -121,6 +146,9 @@ def valid_character(maker):
             return (False, 0)
         elif npc_name == 'q':
             return (False, 1)
+        elif trim_space_punc(npc_name).lower() == 'player':
+            print("You cannot name a NPC character 'player', please pick another name.")
+            continue
         else:
             # Check if the name contains at least one ascii characher
             ascii_found = False
@@ -282,6 +310,7 @@ def valid_relationship(maker):
             if len(char_name_1) == 0:
                 # Player
                 char_id_1 = 0
+                char_name_1 = 'Player'
                 is_char_1_valid = True
             else:
                 # Check if character exists
@@ -322,6 +351,7 @@ def valid_relationship(maker):
             if len(char_name_2) == 0:
                 # Player
                 char_id_2 = 0
+                char_name_2 = 'Player'
                 is_char_2_valid = True
             else:
                 # Check if character exists
@@ -338,6 +368,15 @@ def valid_relationship(maker):
                     continue
                 else:
                     is_char_2_valid = True
+    # Before proceeding, check if a relationship already exists
+    rel_found = False
+    for rel in maker.relationships:
+        if rel[0] == char_id_1 and rel[1] == char_id_2:
+            rel_found = True
+            break
+    if rel_found:
+        print('You already added a relationship for ' + char_name_1.lower() + ' with ' + char_name_2.lower() + '. If you want to overwrite this relationship, you must first delete it.')
+        return (False, 0)
     # Now get the scores
     print('Please enter the short term relationship score (must be an integer).')
     print('The short term relationship score represents the relationship status of two characters in a given moment.')
@@ -2360,18 +2399,20 @@ def valid_delete(maker):
         # Possible dependencies: relationship, inventory, precondition, plot point, action
         dependency_found = False
         rel_char = ''
+        dependency_text = ''
         # Check if a relationship is dependent
         for relationship in maker.relationships:
             if relationship[0] == char_id:
                 rel_char = maker.characters[relationship[1]].name
                 dependency_found = True
+                dependency_text = char_name + ' has a relationship with ' + rel_char + '. You cannot delete ' + char_name + ' until this relationship is removed.'
                 break
             elif relationship[1] == char_id:
-                rel_char = maker.characters[relationship[1]].name
                 dependency_found = True
+                dependency_text = maker.characters[relationship[0]].name + ' has a relationship with ' + char_name + '. You cannot delete ' + char_name + ' until this relationship is removed.'
                 break
         if dependency_found:
-            print('This character has a relationship with ' + rel_char + '. You cannot delete ' + char_name + ' until this relationship is removed.')
+            print(dependency_text)
             return (False, 0)
         # Check if an inventory is dependent
         item_name = ''
@@ -2497,7 +2538,96 @@ def valid_delete(maker):
         maker.connections.pop(idx)
         return (True)
     elif to_delete == 'd':
-        pass
+        # Delete relationship
+        print('Please enter the name of the character you would like to delete the relationship from.')
+        print('If your character is the player, just hit enter.')
+        print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
+        first_name = ''
+        is_first_valid = False
+        first_id = 0
+        while not is_first_valid:
+            try:
+                first_name = raw_input('>')
+            except:
+                first_name = input('>')
+            if first_name == 'ret':
+                return (False, 0)
+            elif first_name == 'q':
+                return (False, 1)
+            if len(first_name) == 0:
+                # Player
+                first_id = 0
+                first_name = 'Player'
+                is_first_valid = True
+            else:
+                # Check if a npc with given name exists
+                npc_exists = False
+                for char in maker.characters.values():
+                    if char.name.lower() == first_name.lower():
+                        npc_exists = True
+                        first_id = char.id
+                        break
+                if not npc_exists:
+                    print('You do not have a character with this name. Please try again.')
+                    continue
+                is_first_valid = True
+        # Get the second character
+        print('Which character do you want to break a relationship with?')
+        print('If you want to break the relationship with the player, just hit enter')
+        list_of_char_ids = [rel[1] for rel in maker.relationships if rel[0] == first_id]
+        list_of_char_names = [maker.characters[i].name.lower() for i in list_of_char_ids]
+        print('Existing relationships: ' + str(list_of_char_names))
+        second_name = ''
+        second_id = 0
+        is_second_valid = False
+        while not is_second_valid:
+            try:
+                second_name = raw_input('>')
+            except:
+                second_name = input('>')
+            if second_name == 'ret':
+                return (False, 0)
+            elif second_name == 'q':
+                return (False, 1)
+            else:
+                if len(second_name) == 0:
+                    # check if player is among the characters
+                    if 'player' in list_of_char_names:
+                        second_id = 0
+                        second_name = 'Player'
+                        is_second_valid = True
+                    else:
+                        print('Player is not among existing relationships. Try again')
+                        continue
+                else:
+                    # Check if name exists
+                    npc_found = False
+                    for char in maker.characters.values():
+                        if char.name.lower() == second_name.lower():
+                            if char.id in list_of_char_ids:
+                                second_id = char.id
+                                npc_found = True
+                                break
+                    if not npc_found:
+                        print('No such character exists in ' + first_name.lower() + '\'s relationships. Try again.')
+                        continue
+                    is_second_valid = True
+        # find the index of the given relationship
+        idx = 0
+        rel_found = False
+        for rel in maker.relationships:
+            if rel[0] == first_id and rel[1] == second_id:
+                rel_found = True
+                break
+            idx += 1
+        if not rel_found:
+            print('No such relationship exists. Please try again with different inputs.')
+            return (False, 0)
+        else:
+            print('Relationship of ' + first_name.lower() + ' with ' + second_name.lower() + 'is removed successfully!')
+            print('Keep in mind that relationships are non-symmetric, meaning the relationship of ' + second_name.lower() + ' with ' + first_name.lower() + ' is not deleted automatically if such relationship exists.')
+            maker.relationships.pop(idx)
+            return (True)  
     elif to_delete == 'e':
         pass
     elif to_delete == 'f':
@@ -2834,17 +2964,19 @@ while True:
         game_maker.create_game()
     elif entered.lower() == 'm':
         # Check added components
-        # PUT THIS ALL IN ANOTHER FUNCTION
         print('Locations: ' + str([loc.name for loc in game_maker.locations.values()]))
         print('NPCs: ' + str([n.name for n in game_maker.characters.values()]))
         print('Items: ' + str([item.name for item in game_maker.items.values()]))
         print('Plot points: ' + str([plot.name for plot in game_maker.plot_points.values()]))
         print('Preconditions: ' + str([(pre.context, pre.name) for pre in game_maker.preconditions.values()]))
+        print_connections(game_maker)
+        print_relationships(game_maker)
     elif entered.lower() == 'n':
         result = valid_delete(game_maker)
-        if not result[0]:
-            if result[1] == 1:
-                print('Goodbye')
-                break
+        if type(result) is tuple:
+            if not result[0]:
+                if result[1] == 1:
+                    print('Goodbye')
+                    break
     else:
         print('Cannot process your request. Please pick an option from the menu.')
