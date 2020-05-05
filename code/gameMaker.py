@@ -2286,15 +2286,17 @@ def valid_delete(maker):
             return (False, 0)
         # Check if any precondition is dependent
         pre_found = ''
+        pre_context = ''
         for (pre_id, pre) in maker.preconditions.items():
             for e in pre.elems:
                 if type(e) is Location:
                     if e.id == loc_id:
                         dependency_found = True
                         pre_found = pre.name
+                        pre_context = pre.context
                         break
         if dependency_found:
-            print('You have a precondition ' + pre_found + ' that contains this location. You cannot delete ' + loc_name + ' until this precondition is removed.')
+            print('You have a ' + pre_context + ' precondition named ' + pre_found + ' that contains this location. You cannot delete ' + loc_name + ' until this precondition is removed.')
             return (False, 0)
         # Check if any connection is dependent
         con_loc = ''
@@ -2426,15 +2428,17 @@ def valid_delete(maker):
             return (False, 0)
         # Check if a precondition is dependent
         pre_found = ''
+        pre_context = ''
         for (pre_id, pre) in maker.preconditions.items():
             for e in pre.elems:
                 if type(e) is NPC:
                     if e.id == char_id:
                         dependency_found = True
                         pre_found = pre.name
+                        pre_context = pre.context
                         break
         if dependency_found:
-            print('You have a precondition ' + pre_found + ' that contains this character. You cannot delete ' + char_name + ' until this precondition is removed.')
+            print('You have a ' + pre_context + ' precondition named ' + pre_found + ' that contains this character. You cannot delete ' + char_name + ' until this precondition is removed.')
             return (False, 0)
         # Check if a plot point is dependent
         plot_point = ''
@@ -2447,7 +2451,7 @@ def valid_delete(maker):
             if dependency_found:
                 break
         if dependency_found:
-            print('You have a plot point ' + plot_point + ' with at least 1 change dependent on this location. You cannot delete ' + loc_name + ' until this plot point is removed.')
+            print('You have a plot point ' + plot_point + ' with at least 1 change dependent on this character. You cannot delete ' + char_name + ' until this plot point is removed.')
             return (False, 0)
         # Check if an action is dependent
         action_name = ''
@@ -2473,7 +2477,7 @@ def valid_delete(maker):
                     action_name = action[2]
                     break
         if dependency_found:
-            print('You have an action ' + action_name + " of category 'call to location' dependent on this location. You cannot delete " + loc_name + ' until this plot point is removed.')
+            print('You have the action ' + action_name + " dependent on this NPC. You cannot delete " + char_name.lower() + ' until this action is removed.')
             return (False, 0)
         # At the point there are no dependents left
         print('NPC ' + maker.characters[char_id].name + ' is deleted successfully!')
@@ -2629,6 +2633,61 @@ def valid_delete(maker):
             maker.relationships.pop(idx)
             return (True)  
     elif to_delete == 'e':
+        # Delete item
+        print('Please enter the name of the item you would like to delete.')
+        print('Available items: ' + str([item.name for item in maker.items.values()]))
+        item_name = ''
+        item_id = 0
+        is_item_valid = False
+        while not is_item_valid:
+            try:
+                item_name = raw_input('>')
+            except:
+                item_name = input('>')
+            if item_name == 'ret':
+                return (False, 0)
+            elif item_name == 'q':
+                return (False, 1)
+            else:
+                # check if item exists
+                item_found = False
+                for i in maker.items.values():
+                    if i.name.lower() == item_name.lower():
+                        item_id = i.id
+                        item_found = True
+                        is_item_valid = True
+                if not item_found:
+                    print('No such item exists. Try again.')
+                    continue
+        # Check if there are any dependents on this item: inventory, action, precondition
+        dependency_found = False
+        # Check for inventory
+        npc_name = ''
+        for inv in maker.inventory:
+            if inv[1] == item_id:
+                dependency_found = True
+                npc_name = maker.characters[inv[0]].name
+                break
+        if dependency_found:
+            print('This item is added to ' + npc_name + '\'s inventory. You cannot delete ' + item_name + ' until this inventory condition is removed.')
+            return (False, 0)
+        # Check for precondition
+        pre_name = ''
+        pre_context = ''
+        # possible preconditions: 'item_in_player_inventory', 'item_not_in_player_inventory', 'item_in_npc_inventory', 'item_in_location' 
+        for (pre_id, pre) in maker.preconditions.items():
+            for e in pre.elems:
+                if type(e) is Item:
+                    if e.id == item_id:
+                        dependency_found = True
+                        pre_name = pre.name
+                        pre_context = pre.context
+                        break
+        if dependency_found:
+            print('You have a ' + pre_context + ' precondition named ' + pre_name + ' that contains this item. You cannot delete ' + item_name + ' until this precondition is removed.')
+            return (False, 0)
+        # Check for action
+        action_name = ''
         pass
     elif to_delete == 'f':
         pass
