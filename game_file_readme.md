@@ -27,4 +27,4 @@ plot (plot point) -> plot point name/is end? (1 = True, 0 = False)/message/list 
 
 adj (adjacency) -> from plot point id/to plot point id/precondition ids list
 
-action (special command) -> is item or npc (0 = item, 1 = npc)/item or npc id/command name/function name/arguments
+action (special command) -> is item or npc (0 = item, 1 = npc)/item or npc id/command name/function name/arguments/preconditions

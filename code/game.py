@@ -190,8 +190,16 @@ class Game(object):
                         continue
                     action_name = tokens[3]
                     if tokens[4] == 'describe something':
-                        action_desc = tokens[5][:-1]
-                        subject.add_action(action_name, describe_something, (action_desc))
+                        action_desc = tokens[5]
+                        conditions = []
+                        if len(tokens) > 6:
+                            split_conditions = tokens[6].split('-')
+                            for condition in split_conditions:
+                                if condition[-1] == '\n':
+                                    conditions.append(preconditions[int(condition[:-1])])
+                                else:
+                                    conditions.append(preconditions[int(condition)])
+                        subject.add_action(action_name, describe_something, action_desc, preconditions=conditions)
                     elif tokens[4] == 'call to location':
                         action_loc = locations[int(tokens[5])]
                         action_npc = npcs[int(tokens[6])]

@@ -1125,7 +1125,6 @@ def valid_plot_point(maker):
                 continue
             else:
                 # Check if plot name already exists
-                # Check if a character with given name already exists
                 same_name_found = False
                 for (plot_id, plot) in maker.plot_points.items():
                     if plot.name.lower() == plot_name.lower():
@@ -1551,7 +1550,54 @@ def valid_action(maker):
             return (False, 0)
         elif description == 'q':
             return (False, 1)
-        return (True, subject, subject_id, command_name, 'describe something', description)
+        # Get preconditions
+        print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
+        print('If you are done adding preconditions, just hit Enter.')
+        print_preconditions(maker, [])
+        preconditions = []
+        is_preconditions_done = False
+        pre_name = ''
+        pre_id = -1
+        while not is_preconditions_done:
+            try:
+                pre_name = raw_input('>')
+            except:
+                pre_name = input('>')
+            if pre_name == 'ret':
+                return (False, 0)
+            elif pre_name == 'q':
+                return (False, 1)
+            else:
+                if len(pre_name) == 0:
+                    # User hit Enter
+                    is_preconditions_done = True
+                    continue
+                # Check if precondition exists
+                pre_found = False
+                for (cond_id, pre) in maker.preconditions.items():
+                    if pre.name.lower() == pre_name.lower():
+                        pre_id = cond_id
+                        pre_found = True
+                        break
+                if not pre_found:
+                    print('No such precondition exists. Please try again.')
+                    print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
+                    print('If you are done adding preconditions, just hit Enter.')
+                    print_preconditions(maker, preconditions)
+                else:
+                    # Check if this precondition was already added
+                    if pre_id in preconditions:
+                        print('You already added this precondition. Please pick another one or just hit Enter if you are done.')
+                        print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
+                        print('If you are done adding preconditions, just hit Enter.')
+                        print_preconditions(maker, preconditions)
+                    else:
+                        preconditions.append(pre_id)
+                        print('Precondition added successfully!')
+                        print('Please enter the name of the preconditions you would like to attach to this action one at a time.')
+                        print('If you are done adding preconditions, just hit Enter.')
+                        print_preconditions(maker, preconditions)
+        return (True, subject, subject_id, command_name, 'describe something', description, preconditions)
     elif action == 'b':
         # Call NPC to Location
         # Get location
@@ -2816,7 +2862,91 @@ def valid_delete(maker):
             maker.inventory.pop(idx)
             return (True) 
     elif to_delete == 'g':
-        pass
+        # Delete precondition
+        print('Please enter the name of the precondition you would like to delete.')
+        print('Keep in mind that you might have to delete its dependent plot points/actions/blocks/etc. first (if there are any).')
+        print_preconditions(maker, [])
+        pre_name = ''
+        pre_id = 0
+        is_pre_valid = False
+        while not is_pre_valid:
+            try:
+                pre_name = raw_input('>')
+            except:
+                pre_name = input('>')
+            if pre_name == 'ret':
+                return (False, 0)
+            elif pre_name == 'q':
+                return (False, 1)
+            else:
+                # check if precondition exists
+                pre_found = False
+                for pre in maker.preconditions.values():
+                    if pre.name.lower() == pre_name.lower():
+                        pre_id = pre.id
+                        pre_found = True
+                        break
+                if not pre_found:
+                    print('No such precondition exists. Please try again.')
+                    continue
+                is_pre_valid = True
+        # Check if there are any dependents
+        dependency_found = False
+        p1, p2 = 0, 0
+        # Check for adjacency
+        for adj in maker.adjacencies:
+            if pre_id in adj[2]:
+                dependency_found = True
+                p1, p2 = adj[0], adj[1]
+                break
+        if dependency_found:
+            print('This precondition is used as adjacency condition between the following plot points:')
+            print(maker.plot_points[p1].name + ' -> ' + maker.plot_points[p2].name)
+            print('You cannot delete this precondition until the adjacency is removed.')
+            return (False, 0)
+        # Check for blocks
+        for block in maker.blocks:
+            if pre_id in block[2]:
+                dependency_found = True
+                break
+        if dependency_found:
+            print('This precondition is used as a block condition between two locations. You cannot delete this precondition until the block is removed.')
+            return (False, 0)
+        # Check for actions
+        action_name = ''
+        for action in maker.actions:
+            if action[3] == 'describe something':
+                if pre_id in action[5]:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            elif action[3] == 'call to location':
+                if pre_id in action[8]:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            elif action[3] == 'interaction with person':
+                if pre_id in action[8]:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            elif action[3] == 'ask for item':
+                if pre_id in action[9]:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            elif action[3] == 'redeem item':
+                if pre_id in action[8]:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+        if dependency_found:
+            print('This precondition is used for the action ' + action_name + '. You cannot delete this precondition until the action is removed.')
+            return (False, 0)
+        # No dependents left - delete the precondition
+        print('Precondition ' + maker.preconditions[pre_id].name + ' is deleted successfully!')
+        del maker.preconditions[pre_id]
+        return (True)
     elif to_delete == 'h':
         pass
     elif to_delete == 'i':
@@ -2969,7 +3099,10 @@ class GameMaker(object):
         for action in self.actions:
             txt = 'action/' + str(action[0]) + '/' + str(action[1]) + '/' + str(action[2]) + '/' + str(action[3]) + '/'
             if action[3] == 'describe something':
-                txt = txt + str(action[4])
+                txt = txt + str(action[4]) + '/'
+                for pre in action[5]:
+                    txt = txt + str(pre) + '-'
+                txt = txt[:-1]
             elif action[3] == 'call to location':
                 txt = txt + str(action[4]) + '/' + str(action[5]) + '/' + str(action[6]) + '/' + str(action[7]) + '/'
                 for pre in action[8]:
