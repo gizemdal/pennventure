@@ -2712,7 +2712,109 @@ def valid_delete(maker):
         del maker.items[item_id]
         return (True)
     elif to_delete == 'f':
-        pass
+        print('Please enter the name of the character whose inventory you want to remove an item from.')
+        print('If your character is the player, just hit enter')
+        print('Available NPCs: ' + str([n.name for n in maker.characters.values() if n.name != 'Player']))
+        char_name = ''
+        char_id = 0
+        is_char_valid = False
+        while not is_char_valid:
+            try:
+                char_name = raw_input('>')
+            except:
+                char_name = input('>')
+            if char_name == 'ret':
+                return (False, 0)
+            elif char_name == 'q':
+                return (False, 1)
+            else:
+                if len(char_name) == 0:
+                    # player - check if there is any inventory condition for player
+                    cond_found = False
+                    for inv in maker.inventory:
+                        if inv[0] == 0:
+                            cond_found = True
+                            break
+                    if cond_found:
+                        char_name = 'Player'
+                        char_id = 0
+                        is_char_valid = True
+                    else:
+                        print('It looks like player does not have any items assigned for inventory. Please try again.')
+                        continue
+                else:
+                    # check if character exists
+                    char_found = False
+                    for char in maker.characters.values():
+                        if char.name.lower() == char_name.lower():
+                            # Check if inventory condition exists for this character
+                            char_found = True
+                            cond_found = False
+                            for inv in maker.inventory:
+                                if inv[0] == char.id:
+                                    cond_found = True
+                                    char_name = char.name
+                                    char_id = char.id
+                                    break
+                            if cond_found:
+                                is_char_valid = True
+                            else:
+                                print('It looks like ' + char.name + ' does not have any items assigned for inventory. Please try again.')
+                            break
+                    if not char_found:
+                        print('No such character exists. Please try again.')
+                        continue
+        # now get item
+        print('Please enter the name of the item you would like to remove from ' + char_name + '\'s inventory.')
+        list_of_inv_items = [maker.items[inv[1]].name for inv in maker.inventory if inv[0] == char_id]
+        print('Items in inventory: ' + str(list_of_inv_items))
+        item_name = ''
+        item_id = 0
+        is_item_valid = False
+        while not is_item_valid:
+            try:
+                item_name = raw_input('>')
+            except:
+                item_name = input('>')
+            if item_name == 'ret':
+                return (False, 0)
+            elif item_name == 'q':
+                return (False, 1)
+            else:
+                # check if item exists and is actually in list_of_inv_items
+                item_found = False
+                for item in maker.items.values():
+                    if item_name.lower() == item.name.lower():
+                        item_found = True
+                        item_in_inventory = False
+                        for inv in list_of_inv_items:
+                            if inv.lower() == item_name.lower():
+                                item_in_inventory = True
+                                item_id = item.id
+                                break
+                        if item_in_inventory:
+                            is_item_valid = True
+                        else:
+                            print('This item is not in ' + char_name + '\'s inventory. Please try again.')
+                        break
+                if not item_found:
+                    print('No such item exists. Please try again.')
+                    continue
+        # Inventory has no dependents - delete it
+        idx = 0
+        inv_found = False
+        for inv in maker.inventory:
+            if inv[0] == char_id and inv[1] == item_id:
+                inv_found = True
+                break
+            idx += 1
+        if not inv_found:
+            print('No such inventory change exists. Please try again with different inputs.')
+            return (False, 0)
+        else:
+            print(item_name + ' is removed from ' + char_name + '\'s inventory successfully!')
+            maker.inventory.pop(idx)
+            return (True) 
     elif to_delete == 'g':
         pass
     elif to_delete == 'h':
