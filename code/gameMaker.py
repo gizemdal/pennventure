@@ -2477,7 +2477,7 @@ def valid_delete(maker):
                     action_name = action[2]
                     break
         if dependency_found:
-            print('You have the action ' + action_name + " dependent on this NPC. You cannot delete " + char_name.lower() + ' until this action is removed.')
+            print('You have the action ' + action_name + " dependent on this NPC. You cannot delete " + char_name + ' until this action is removed.')
             return (False, 0)
         # At the point there are no dependents left
         print('NPC ' + maker.characters[char_id].name + ' is deleted successfully!')
@@ -2688,7 +2688,29 @@ def valid_delete(maker):
             return (False, 0)
         # Check for action
         action_name = ''
-        pass
+        for action in maker.actions:
+            if action[0] == 0:
+                if action[1] == item_id:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            if action[3] == 'ask for item':
+                if action[6] == item_id:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+            elif action[3] == 'redeem item':
+                if action[5] == item_id or action[6] == item_id:
+                    dependency_found = True
+                    action_name = action[2]
+                    break
+        if dependency_found:
+            print('You have the action ' + action_name + " dependent on this item. You cannot delete " + item_name.lower() + ' until this action is removed.')
+            return (False, 0)
+        # At the point there are no dependents left
+        print('Item ' + maker.items[item_id].name + ' is deleted successfully!')
+        del maker.items[item_id]
+        return (True)
     elif to_delete == 'f':
         pass
     elif to_delete == 'g':
