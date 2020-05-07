@@ -50,20 +50,116 @@ def print_preconditions(maker, preconditions):
         print('\tName: ' + str(condition[1]) + ' , Context: ' + str(condition[0]))
 
 def print_relationships(maker):
+    print('\tRelationships: ')
     if len(maker.relationships) == 0:
-        print('No relationship is created yet.')
+        print('\t\tNo relationship is added yet.')
     else:
-        print('\nRelationships: ')
         for rel in maker.relationships:
-            print(str(maker.characters[rel[0]].name) + ' -> ' + str(maker.characters[rel[1]].name) + ', Short term: ' + str(rel[2]) + ', Long term: ' + str(rel[3]))
+            print('\t\t' + str(maker.characters[rel[0]].name) + ' -> ' + str(maker.characters[rel[1]].name) + ', Short term: ' + str(rel[2]) + ', Long term: ' + str(rel[3]))
 
 def print_connections(maker):
+    print('\tConnections: ')
     if len(maker.connections) == 0:
-        print('No connection is created yet.')
+        print('\t\tNo connection is added yet.')
     else:
-        print('\nConnections: ')
         for con in maker.connections:
-            print('Locations: ' + str(maker.locations[con[0]].name) + ' <-> ' + str(maker.locations[con[1]].name) + ', Direction: ' + str(con[2]) + '/' + str(direction_opp(con[2])))
+            print('\t\tLocations: ' + str(maker.locations[con[0]].name) + ' <-> ' + str(maker.locations[con[1]].name) + ', Direction: ' + str(con[2]) + '/' + str(direction_opp(con[2])))
+
+def print_adjacency(maker):
+    print('Adjacencies: ')
+    idx = 0
+    for adj in maker.adjacencies:
+        print('\t' + str(idx) + ': ' + maker.plot_points[adj[0]].name + ' -> ' + maker.plot_points[adj[1]].name)
+
+def print_blocks(maker):
+    print('Blocks: ')
+    idx = 0
+    for block in maker.blocks:
+        print('\t' + str(idx) + ': from ' + maker.locations[block[0]].name + ' in direction \'' + block[1] + '\'')
+
+def print_actions(maker):
+    print('Actions: ')
+    idx = 0
+    for action in maker.actions:
+        print('\t' + str(idx) + ': from category \'' + action[3] + '\' named ' + action[2])
+
+def print_all_added_comps(maker):
+    # Check added components
+    print('ADDED COMPONENTS:')
+    # print locations
+    print('\tLocations: ')
+    if not maker.locations:
+        print('\t\tNo location is added yet.')
+    else:
+        for loc in maker.locations.values():
+            print('\t\t' + loc.name)
+    # print connections
+    print_connections(maker)
+    # print blocks
+    print('\tBlocks: ')
+    if not maker.blocks:
+        print('\t\tNo block is added yet.')
+    else:
+        for block in maker.blocks:
+            print('\t\tFrom: ' + maker.locations[block[0]].name + ', Direction: ' + block[1])
+    # print npcs
+    print('\tNPCs: ')
+    if len(maker.characters) == 1:
+        print('\t\tNo character is added yet.')
+    else:
+        for n_id, n in maker.characters.items():
+            if n_id == 0:
+                continue
+            print('\t\t' + n.name)
+    # print relationships
+    print_relationships(game_maker)
+    # print items
+    print('\tItems: ')
+    if not maker.items:
+        print('\t\tNo item is added yet.')
+    else:
+        for item in maker.items.values():
+            print('\t\t' + item.name)
+    # print inventory
+    print('\tInventory: ')
+    if len(maker.inventory) == 0:
+        print('\t\tNo inventory change is added yet.')
+    else:
+        for inv in maker.inventory:
+            print('\t\tItem \'' + maker.items[inv[1]].name + '\' is added to ' + maker.characters[inv[0]].name + '\'s inventory.')
+    # print plot points
+    print('\tPlot points: ')
+    if not maker.plot_points:
+        print('\t\tNo plot point is added yet.')
+    else:
+        for plot_id, plot in maker.plot_points.items():
+            if plot_id == 0:
+                print('\t\t' + plot.name + ' (START)')
+            elif plot.is_end:
+                print('\t\t' + plot.name + ' (END)')
+            else:
+                print('\t\t' + plot.name)
+    # print adjacency
+    print('\tAdjacencies: ')
+    if len(maker.adjacencies) == 0:
+        print ('\t\tNo plot graph adjacency is added yet.')
+    else:
+        for adj in maker.adjacencies:
+            print('\t\t' + maker.plot_points[adj[0]].name + ' -> ' + maker.plot_points[adj[1]].name)
+    # print preconditions
+    print('\tPreconditions: ')
+    if not maker.preconditions:
+        print('\t\tNo precondition is added yet.')
+    else:
+        for pre in maker.preconditions:
+            print('\t\tContext: ' + pre.context + ', Name: ' + pre.name)
+    # print actions
+    print('\tActions: ')
+    if len(maker.actions) == 0:
+        print ('\t\tNo action is added yet.')
+    else:
+        for action in maker.actions:
+            print('\t\t' + action[2] + ' -> ' + action[3])
 
 def valid_location(maker):
     # First get a valid location name
@@ -2948,13 +3044,152 @@ def valid_delete(maker):
         del maker.preconditions[pre_id]
         return (True)
     elif to_delete == 'h':
-        pass
+        # Plot Point
+        print('Please enter the name of the plot point you would like to delete.')
+        print('Keep in mind that you might have to delete its dependent adjacency conditions first (if there are any).')
+        print('Available plot points: ' + str([point.name for point in maker.plot_points.values()]))
+        plot_name = ''
+        plot_id = 0
+        is_plot_valid = False
+        while not is_plot_valid:
+            try:
+                plot_name = raw_input('>')
+            except:
+                plot_name = input('>')
+            if plot_name == 'ret':
+                return (False, 0)
+            elif plot_name == 'q':
+                return (False, 1)
+            else:
+                # check if plot point exists
+                plot_found = False
+                for plot in maker.plot_points.values():
+                    if plot.name.lower() == plot_name.lower():
+                        plot_found = True
+                        plot_id = plot.id
+                        break
+                if not plot_found:
+                    print('No such plot point exists. Please try again.')
+                    continue
+                is_plot_valid = True
+        # Check if there are any dependent adjacencies
+        dependency_found = False
+        other_plot = 0
+        for adj in maker.adjacencies:
+            if adj[0] == plot_id:
+                other_plot = adj[1]
+                dependency_found = True
+                break
+            elif adj[1] == plot_id:
+                other_plot = adj[0]
+                dependency_found = True
+                break
+        if dependency_found:
+            print('There exists a directed edge (adjacency) between \'' + maker.plot_points[plot_id].name + '\' and \'' + maker.plot_points[other_plot].name + '\'. You cannot delete this plot point until this adjacency is removed.')
+            return (False, 0)
+        else:
+            # Delete the plot point
+            print('Plot point \'' + plot_name.lower() + '\' is deleted successfully!')
+            del maker.plot_points[plot_id]
+            return (True)
     elif to_delete == 'i':
-        pass
+        # Plot point adjacency
+        print('Please enter the number of the adjacency you would like to delete.')
+        print('Keep in mind that deletion of adjacencies resulting in graph disconnection are not automatically fixed.')
+        print_adjacency(maker)
+        adj_num = 0
+        adj_input = ''
+        is_valid_num = False
+        while not is_valid_num:
+            try:
+                adj_input = raw_input('>')
+            except:
+                adj_input = input('>')
+            if adj_input == 'ret':
+                return (False, 0)
+            elif adj_input == 'q':
+                return (False, 1)
+            else:
+                try:
+                    adj_num = int(adj_input)
+                except:
+                    print('You must enter a valid integer. Please try again.')
+                    continue
+                # Check if integer is in given range
+                if adj_num < 0 or adj_num > len(maker.adjacencies) - 1:
+                    print('The value you entered does not fit the interval. Please try again.')
+                    continue
+                is_valid_num = True
+        # Delete the adjacency
+        adj_val = maker.adjacencies[adj_num]
+        print('Adjacency from \'' + maker.plot_points[adj_val[0]].name + '\' to \'' + maker.plot_points[adj_val[1]].name + '\' is deleted successfully!')
+        maker.adjacencies.pop(adj_num)
+        return (True)
     elif to_delete == 'j':
-        pass
+        # Block deletion
+        print('Please enter the number of the block you would like to delete.')
+        print_blocks(maker)
+        block_num = 0
+        block_input = ''
+        is_valid_num = False
+        while not is_valid_num:
+            try:
+                block_input = raw_input('>')
+            except:
+                block_input = input('>')
+            if block_input == 'ret':
+                return (False, 0)
+            elif block_input == 'q':
+                return (False, 1)
+            else:
+                try:
+                    block_num = int(block_input)
+                except:
+                    print('You must enter a valid integer. Please try again.')
+                    continue
+                # Check if integer is in given range
+                if block_num < 0 or block_num > len(maker.blocks) - 1:
+                    print('The value you entered does not fit the interval. Please try again.')
+                    continue
+                is_valid_num = True
+        # Delete the block
+        block_val = maker.blocks[block_num]
+        print('Block from ' + maker.locations[block_val[0]].name + ' in direction \'' + block_val[1] + '\' is deleted successfully!')
+        print('Keep in mind that the block in direction \'' + direction_opp(block_val[1]) + '\' from the opposite location will be deleted automatically.')
+        maker.blocks.pop(block_num)
+        return (True)
     elif to_delete == 'k':
-        pass
+        # Action deletion
+        print('Please enter the number of the action you would like to delete.')
+        print_actions(maker)
+        action_num = 0
+        action_input = ''
+        is_valid_num = False
+        while not is_valid_num:
+            try:
+                action_input = raw_input('>')
+            except:
+                action_input = input('>')
+            if action_input == 'ret':
+                return (False, 0)
+            elif action_input == 'q':
+                return (False, 1)
+            else:
+                try:
+                    action_num = int(action_input)
+                except:
+                    print('You must enter a valid integer. Please try again.')
+                    continue
+                # Check if integer is in given range
+                if action_num < 0 or action_num > len(maker.actions) - 1:
+                    print('The value you entered does not fit the interval. Please try again.')
+                    continue
+                is_valid_num = True
+        # Delete the adjacency
+        action_val = maker.actions[action_num]
+        print('Action named \'' + action_val[2] + '\' is deleted successfully!')
+        maker.actions.pop(action_num)
+        return (True)
     else:
         return (False, 0)
 
@@ -3279,14 +3514,7 @@ while True:
     elif entered.lower() == 'l':
         game_maker.create_game()
     elif entered.lower() == 'm':
-        # Check added components
-        print('Locations: ' + str([loc.name for loc in game_maker.locations.values()]))
-        print('NPCs: ' + str([n.name for n in game_maker.characters.values()]))
-        print('Items: ' + str([item.name for item in game_maker.items.values()]))
-        print('Plot points: ' + str([plot.name for plot in game_maker.plot_points.values()]))
-        print('Preconditions: ' + str([(pre.context, pre.name) for pre in game_maker.preconditions.values()]))
-        print_connections(game_maker)
-        print_relationships(game_maker)
+        print_all_added_comps(game_maker)
     elif entered.lower() == 'n':
         result = valid_delete(game_maker)
         if type(result) is tuple:
