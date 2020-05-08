@@ -40,3 +40,9 @@
 - Item: Represents items in the game. Items can be divided into two categories: collectable and non-collectable. An item has a name, description and current location. Every Item instance contains a list of actions that the player can perform with them
 
 - Functions.py: This file contains special functions associated with items/npcs
+
+### Demo Videos
+
+- Gameplay demo: https://vimeo.com/409916978
+- Game maker demo: https://vimeo.com/409922468
+- Final edits demo: https://vimeo.com/416420576
