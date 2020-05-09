@@ -17,7 +17,11 @@
 - in
 - out
 
-### Classes and their functionality
+### How to run
+- For game maker, run gameMaker.py
+- To play the game, run game.py
+
+### Game Simulator classes and their functionality
 
 - Game: the main class where all the necessary game data is built. Contains parser reference
 
